@@ -47,7 +47,14 @@ int: frame id
 
 # Neighbour Map, \*.neigh
 
-* INT a: group number  
+* *INT* a: group number  
 * **For Loop** \* a  
-  * INT b: number of neigh, including itself
-  * int \* b: neigh group id
+  * *INT* b: number of neigh, including itself
+  * *INT* \* b: neigh group id
+
+---
+
+# Group Info, \*.group
+
+* *INT* a: number of hair strand
+* *INT* \* a: the id of each group

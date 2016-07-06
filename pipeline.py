@@ -16,20 +16,6 @@ if __name__ == "__main__":
     import numpy as np
     np.set_printoptions(suppress=True)
 
-    # parameter begin
-    nFrame = 200
-    nStep = 1000 # weight discretization
-    nGroup = 400
-    radius = 0.04
-    frameFilter = 0.2
-    prefix = ["c0524"]
-    fileName = file3
-    split=40
-    guideOpts = ["rand", "opt", "worst"]
-    bReport = True
-    bMail = True
-    # parameter end
-
     needLoad = False
     import getopt
     try:
@@ -49,12 +35,12 @@ if __name__ == "__main__":
     import GraphBuilder as gb
     import metis_graph as mg
     import os
-
-    def setReadOnly(fileName):
-        os.system('attrib +r \"'+fileName+'\"')
+    import common_tools as ctools
 
     if not needLoad:
         # step 1
+        logger = ctools.getDefaultLogger(ctools.)
+
         builder = ch.GraphBuildHooker(radius)
         builder.startLoop("Build InitGraph:")
         nCache.loop(fileName, builder, nFrame)
