@@ -1,4 +1,4 @@
-*.pyw
+*.pyc
 *.group
 *.dump
 *.anim*

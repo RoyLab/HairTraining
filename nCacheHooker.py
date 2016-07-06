@@ -37,7 +37,9 @@ class GraphBuildHooker(Hooker):
         self.edges = {}
 
     def postFrame(self):
-        self.edges = createInitGraphLoop(self.radius, self.frame, self.edges, self.i)
+        factor = self.frame.n_particle /  self.frame.n_hair
+        self.edges = createInitGraphLoop(self.radius, self.frame,\
+         self.edges, self.i, factor)
         if self.i == 0:
             self.refFrame = self.frame
             self.nParticle = self.frame.n_particle
@@ -50,15 +52,14 @@ class GraphBuildHooker(Hooker):
         return self.nStrand, self.nParticle, self.edges, self.refFrame
 
 class ConnectionCalcHooker(Hooker):
-    def __init__(self, edges, reference, prefix):
+    def __init__(self, edges, reference):
         super(ConnectionCalcHooker, self).__init__()
         self.edges = edges
         self.reference = reference
-        self.prefix = prefix
         for k in edges.keys():
             edges[k] = np.zeros(2)
         import os
-        self.path = ".dump/frame-"+self.prefix+'/'
+        self.path = "frame/"
         if not os.path.exists(self.path):
             os.makedirs(self.path)
 
@@ -87,15 +88,14 @@ class ConnectionCalcHooker(Hooker):
 
 
 class GuideHairHooker(Hooker):
-    def __init__(self, guide, ref, prefix):
+    def __init__(self, guide, ref):
         super(GuideHairHooker, self).__init__()
         self.data = []
         self.guide = guide
         self.refFrame = ref
-        self.prefix = prefix
 
     def postFrame(self):
-        dumpFile = ".dump/frame-"+self.prefix+"/frame"+str(self.i)+".dump"
+        dumpFile = "/frame/frame"+str(self.i)+".dump"
         self.frame.selectGuideHair(self.guide, dumpFile)
         self.frame.calcSelectedParticleMotionMatrices(self.refFrame, self.guide)
         self.frame.clearAsGuideInfo()
@@ -131,12 +131,11 @@ class GuideHairHooker(Hooker):
         return
 
 class NormalHairHooker(Hooker):
-    def __init__(self, guideData, ref, prefix, i, split, graph):
+    def __init__(self, guideData, ref, i, split, graph):
         super(NormalHairHooker, self).__init__()
 
         self.guide = guideData
         self.graph = graph
-        self.prefix = prefix
         self.refFrame = ref
 
         self.data = []
@@ -150,7 +149,7 @@ class NormalHairHooker(Hooker):
             self.end = nStrand
 
     def postFrame(self):
-        dumpFile = ".dump/frame-"+self.prefix+"/frame"+str(self.i)+".dump"
+        dumpFile = "frame/frame"+str(self.i)+".dump"
         self.frame.selectNormalHair(self.start, self.end, dumpFile)
         self.data.append(self.frame)
         super(NormalHairHooker, self).postFrame()

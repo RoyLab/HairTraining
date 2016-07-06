@@ -36,10 +36,18 @@ if __name__ == "__main__":
     import metis_graph as mg
     import os
     import common_tools as ctools
+    from common_tools import setReadOnly
+    from local_para import *
+
+    oldenv = os.path.abspath('.')
+    os.chdir(dumpFilePath)
+    fileName = mxcFile
 
     if not needLoad:
         # step 1
-        logger = ctools.getDefaultLogger(ctools.)
+        logger = ctools.getDefaultLogger(ctools.renameWithBase("log.log"))
+        logger.info("start to build graph.")
+        logger.info(reportSettings())
 
         builder = ch.GraphBuildHooker(radius)
         builder.startLoop("Build InitGraph:")
@@ -53,13 +61,13 @@ if __name__ == "__main__":
         gb.filterEdges(edges, thresh)
 
         refFrame.calcParticleDirections()
-        ruler = ch.ConnectionCalcHooker(edges, refFrame, prefix[0])
+        ruler = ch.ConnectionCalcHooker(edges, refFrame)
         ruler.startLoop("Measure the deviation:")
         nCache.loop(fileName, ruler, nFrame)
         ruler.endLoop()
 
-        pkl.dump(edges, file(prefix[0]+'-edges.dump', 'w'))
-        setReadOnly(prefix[0]+'-edges.dump')
+        pkl.dump(edges, file('edges.dump', 'w'))
+        setReadOnly('edges.dump')
 
         #step 2
         strandGraph = gb.shrinkGraph(edges, factor)
@@ -69,15 +77,19 @@ if __name__ == "__main__":
         gb.normalize(particleGraph, nStep)
         gb.normalize(strandGraph, nStep)
 
-        pkl.dump(particleGraph, file(prefix[0]+'mgA.dump', 'w'))
-        setReadOnly(prefix[0]+'mgA.dump')
-        pkl.dump(strandGraph, file(prefix[0]+'mgB.dump', 'w'))
-        setReadOnly(prefix[0]+'mgB.dump')
+        pkl.dump(particleGraph, file('mgA.dump', 'w'))
+        setReadOnly('mgA.dump')
+        pkl.dump(strandGraph, file('mgB.dump', 'w'))
+        setReadOnly('mgB.dump')
 
-        pkl.dump((nStrand, nParticle, factor, refFrame, radius, frameFilter), file(prefix[0]+'info.dump', 'w'))
+        pkl.dump((nStrand, nParticle, factor, refFrame, radius, frameFilter),\
+         file('info.dump', 'w'))
+
+        logger.info("end to build graph.")
+
     else:
         nStrand, nParticle, factor, refFrame, radius, frameFilter = pkl.load(file(prefix[0]+'info.dump', 'r'))
-        strandGraph = pkl.load(file(prefix[0]+'mgB.dump'))
+        strandGraph = pkl.load(file('mgB.dump'))
 
         # step 3
         _g = strandGraph

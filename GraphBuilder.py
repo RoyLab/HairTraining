@@ -4,9 +4,16 @@ def createKDTree(n_pts, data):
     kdt = cKDTree(data.data)
     return kdt
 
-def createInitGraphLoop(radius, frame, edgeHash, i):
+def createInitGraphLoop(radius, frame, edgeHash, i, factor):
     kdt = createKDTree(frame.n_particle, frame)
     pairs = kdt.query_pairs(radius)
+    # filter with index
+    tmp = []
+    for pair in pairs:
+        if (pair[1]-pair[0]) % factor != 0:
+            tmp.append(pair)
+    pairs = tmp
+    
     if i == 0:
         edgeHash = dict.fromkeys(pairs, None)
         for key in edgeHash.keys():
