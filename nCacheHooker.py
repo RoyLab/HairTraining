@@ -30,6 +30,21 @@ class Hooker(object):
         self.frame.loadIntoMemory(name, sz, arr)
         return
 
+# the max frame number must be 1
+class ParamHooker(Hooker):
+    def __init__(self):
+        super(GraphBuildHooker, self).__init__()
+
+    def postFrame(self):
+        self.refFrame = self.frame
+        self.nParticle = self.frame.n_particle
+        self.nStrand = self.frame.n_hair
+
+        super(GraphBuildHooker, self).postFrame()
+
+    def param(self):
+        return self.nStrand, self.nParticle, self.nParticle / self.nStrand, self.refFrame
+
 class GraphBuildHooker(Hooker):
     def __init__(self, radius):
         super(GraphBuildHooker, self).__init__()

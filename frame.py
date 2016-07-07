@@ -49,6 +49,7 @@ class Frame:
         # elif self.count == 1:
             self.n_hair = int(data[0])
             self.n_particle = self.n_hair * n_particle_per_strand
+            self.factor = n_particle_per_strand
 
         elif (vertexPositions.match(name)):
         # elif self.count == 3:
@@ -150,7 +151,7 @@ class Frame:
             squared_diff(point_trans(t1, ref0), cur0)
 
     def deviationVector(self, id0, id1):
-        
+
         cur0 = self.data[id0], self.particle_direction[id0]
         cur1 = self.data[id1], self.particle_direction[id1]
 

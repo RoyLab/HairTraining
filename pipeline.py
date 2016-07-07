@@ -43,6 +43,22 @@ if __name__ == "__main__":
     os.chdir(dumpFilePath)
     fileName = mxcFile
 
+    import nCacheHookerMulti as chm
+    from math import sqrt
+    def f(q, o):
+        res = q.get()
+        for i in xrange(10000000):
+            sqrt(i)
+        o.put(1)
+        print "work done!"
+
+    builder = chm.ParallelHooker(200, f)
+    builder.startLoop("Build InitGraph:")
+    nCache.loop(fileName, builder, nFrame)
+    builder.endLoop()
+
+    quit()
+
     if not needLoad:
         # step 1
         logger = ctools.getDefaultLogger(ctools.renameWithBase("log.log"))
