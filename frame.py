@@ -150,7 +150,7 @@ class Frame:
             squared_diff(point_trans(t1, ref0), cur0)
 
     def deviationVector(self, id0, id1):
-        
+
         cur0 = self.data[id0], self.particle_direction[id0]
         cur1 = self.data[id1], self.particle_direction[id1]
 
@@ -170,7 +170,7 @@ class Frame:
     def calcMotionMatrix(self, reference):
         self.reference = reference
         self.calcRigidMotionMatrix(reference)
-        self.calcParticleMotionMatrices_parallel();
+        self.calcParticleMotionMatrices();
 
     def calcRigidMotionMatrix(self, reference):
         self.reference = reference
