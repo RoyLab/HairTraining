@@ -6,7 +6,10 @@ import metis_graph as mg
 
 
 if __name__ == "__main__":
-    fileName = "c0524mgB.dump"
+    from local_para import *
+    import os
+    os.chdir(dumpFilePath)
+    fileName = dumpedmgB
     exportName = sys.argv[1]
     assert(exportName != "")
 

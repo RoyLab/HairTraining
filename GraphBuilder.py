@@ -10,10 +10,10 @@ def createInitGraphLoop(radius, frame, edgeHash, i, factor):
     # filter with index
     tmp = []
     for pair in pairs:
-        if (pair[1]-pair[0]) % factor != 0:
+        if (pair[1]-pair[0]) % factor == 0:
             tmp.append(pair)
     pairs = tmp
-    
+
     if i == 0:
         edgeHash = dict.fromkeys(pairs, None)
         for key in edgeHash.keys():

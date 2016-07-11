@@ -1,3 +1,5 @@
+import os
+
 
 def setReadOnly(fileName):
     os.system('attrib +r \"'+fileName+'\"')

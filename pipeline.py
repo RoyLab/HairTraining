@@ -27,7 +27,6 @@ if __name__ == "__main__":
         for o,a in opts:
             if o == "-f":
                 needLoad = True
-                prefix[0] = a
 
     import cPickle as pkl
     import nCache
@@ -88,34 +87,35 @@ if __name__ == "__main__":
         logger.info("end to build graph.")
 
     else:
-        nStrand, nParticle, factor, refFrame, radius, frameFilter = pkl.load(file(prefix[0]+'info.dump', 'r'))
+        nStrand, nParticle, factor, refFrame, radius, frameFilter = pkl.load(file('info.dump', 'r'))
         strandGraph = pkl.load(file('mgB.dump'))
-
+        refFrame.calcParticleDirections()
         # step 3
         _g = strandGraph
 
         import networkx as nx
-        import metis
+        # import metis
         import metis_graph as mg
-        G = nx.Graph()
-        G.add_nodes_from(range(nStrand))
-        itr = mg.UndirectedIterator(_g)
-        for edge in itr:
-            G.add_edge(edge[0], edge[1], weight=edge[2])
+        # G = nx.Graph()
+        # G.add_nodes_from(range(nStrand))
+        # itr = mg.UndirectedIterator(_g)
+        # for edge in itr:
+        #     G.add_edge(edge[0], edge[1], weight=edge[2])
 
-        cut, vers = metis.part_graph(G, nGroup)
+        # cut, vers = metis.part_graph(G, nGroup)
         import pymetis
-        cut2, vers2 = pymetis.part_graph(nGroup, xadj=_g.xadj, adjncy=_g.adjncy, eweights=_g.eweights)
+        cut, vers = pymetis.part_graph(nGroup, xadj=_g.xadj, adjncy=_g.adjncy, eweights=_g.eweights)
 
-        f = open(prefix[0]+".group","wb")
+        f = open(str(nGroup)+".group","wb")
         import struct
         f.write(struct.pack('i', len(vers)))
         for i in vers:
             f.write(struct.pack('i', i))
         f.close()
-        import ipdb; ipdb.set_trace()
 
         # rand, opt, worst
+        prefix = ("None",)
+
         for iiii in range(3):
             opt = guideOpts[iiii]
 
@@ -123,11 +123,11 @@ if __name__ == "__main__":
             starttime = time.strftime('%Y-%m-%d  %Hh%Mm%Ss',time.localtime(time.time()))
             hairGroup = gh.GroupedGraph(strandGraph, vers)
             hairGroup.solve(opt)
-            sign = prefix[0] + '-'+opt+'-'
+            sign = opt+'-'
             sign += time.strftime('%m-%d %Hh%Mm%Ss',time.localtime(time.time()))
             hairGroup.dumpNeighbourMap(prefix[0])
 
-            guideImporter = ch.GuideHairHooker(hairGroup.guide, refFrame, prefix[0])
+            guideImporter = ch.GuideHairHooker(hairGroup.guide, refFrame)
             guideImporter.startLoop("Import guide hair data with %d frames:" % nFrame)
             nCache.loop(fileName, guideImporter, nFrame)
             guideImporter.endLoop()
@@ -141,7 +141,7 @@ if __name__ == "__main__":
             error = 0.0
             weights = []
             for i in range(split+1):
-                nImporter = ch.NormalHairHooker(guideData, refFrame, prefix[0], i, split, hairGroup)
+                nImporter = ch.NormalHairHooker(guideData, refFrame, i, split, hairGroup)
                 nImporter.startLoop("precomputation %d / %d:" % (i+1, split))
                 nCache.loop(fileName, nImporter, nFrame)
                 nImporter.endLoop()
@@ -176,7 +176,7 @@ if __name__ == "__main__":
 
                 print content
 
-                f = open("./Report/"+sign+".txt", 'w');
+                f = open("../Report/"+sign+".txt", 'w');
                 f.write(content)
                 f.close()
 
