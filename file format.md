@@ -5,11 +5,11 @@ int a1: particle per strand
 int b: number of frame  
 int \* a: guide id  
 int: frame id  
-float \* a \* a1 \* (6+3): rot, translate  
+float \* a \* a1 \* (9+3): rot, translate  
 
 ---
 
-# Weights, \*.weights
+# Weights, \*.weights (deprecated)
 
 int b: number of strand  
 
@@ -58,3 +58,18 @@ int: frame id
 
 * *INT* a: number of hair strand
 * *INT* \* a: the id of each group
+
+---
+
+# Strand Edge Info, \*.bg
+
+* **INT** a: number of Edge
+* **INT** : max weight of edge
+* **For Loop** \* a  
+  * **INT** : id0
+  * **INT** : id1 (bigger)
+  * **INT** : weight
+
+---
+
+# Interpolation
