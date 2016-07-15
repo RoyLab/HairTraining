@@ -1,7 +1,8 @@
 import cPickle as pkl
 import struct
+from local_para import *
 
-fileName = ".dump/s400004-06  02h45m59sweights.dump"
+fileName = dumpLocation
 needMerge = False
 factor = 5
 weights = pkl.load(file(fileName, 'rb'))
@@ -20,7 +21,7 @@ nStrand = len(weights)
 
 print "there is %d strands." % nStrand
 
-fileb = open("s4000-04-06 02h45m59s.weights", 'wb')
+fileb = open(weightLocation, 'wb')
 fileb.write(struct.pack('i', nStrand))
 
 guideCount = 0

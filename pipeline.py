@@ -116,8 +116,7 @@ if __name__ == "__main__":
         # rand, opt, worst
         prefix = ("None",)
 
-        for iiii in range(3):
-            opt = guideOpts[iiii]
+        for opt in guideOpts:
 
             import guide_hair as gh
             starttime = time.strftime('%Y-%m-%d  %Hh%Mm%Ss',time.localtime(time.time()))

@@ -122,16 +122,15 @@ if __name__ == "__main__":
     import nCache
     from progressbar import*
     import crash_on_ipy
+    from local_para import *
+    import os
+    os.chdir(dumpFilePath)
 
     nFrame = 200
     # fileName = "../../maya cache/03074/hair_nRigidShape1.xml"
-    fileName = "E:/cache/c0514.xml"
-    prefix = "c0524"
+    fileName = mxcFile
 
-    wFile = "c0524-rand-05-26 16h47m23s-weights.dump"
-    cacheFile = "c0524-rand-05-26 16h47m23s"
-
-    nStrand, nParticle, factor, refFrame, radius, frameFilter = pkl.load(file(prefix+'info.dump', 'r'))
+    nStrand, nParticle, factor, refFrame, radius, frameFilter = pkl.load(file(dumpFilePath+'\info.dump', 'r'))
     guide, weights = pkl.load(file(wFile, 'rb'))
     factor = 5
 
@@ -148,7 +147,7 @@ if __name__ == "__main__":
     #     nStrand = n
     print len(weights)
 
-    guideImporter = ch.GuideHairHooker(guide, refFrame, prefix)
+    guideImporter = ch.GuideHairHooker(guide, refFrame)
     guideImporter.startLoop("Import guide hair data with %d frames:" % nFrame)
     nCache.loop(fileName, guideImporter, nFrame)
     guideImporter.endLoop()
