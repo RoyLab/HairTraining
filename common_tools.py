@@ -43,6 +43,26 @@ def renameWithBase(name, length=3):
     return prefix +  middle + postfix
 
 
+def writeBinary(f, para, content):
+    from struct import pack
+    f.write(pack(para, content))
+
+def writeInt(f, content):
+    writeBinary(f, 'i', content)
+
+def writeFloat(f, content):
+    writeBinary(f, 'f', content)
+
+def readBinary(f, para):
+    from struct import unpack
+    return unpack(para, f.read(4))
+
+def readInt(f):
+    return readBinary(f, 'i')[0]
+
+def readFloat(f):
+    return readBinary(f, 'f')[0]
+
 if __name__ == "__main__":
     import os
 

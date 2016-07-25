@@ -49,10 +49,10 @@
 * **Group (Optional)** --- 4b bytes
   * **For Loop** x b
     * **Int:** group ID
-* **Neighboring (Optional)** --- 128 bytes
+* **Neighboring (Optional)** --- dynamic
   * **For Loop** x m  
     * **Int q:**: number of neigh (including itself)
     * **Int** x q: neigh group ID
-* **Interpolation (Optional)** --- 128 bytes
+* **Interpolation (Optional)** --- dynamic
   * **Char[128]:** relative path of anim2, '0' means none
 *
