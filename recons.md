@@ -45,6 +45,7 @@
     * **Int p:** number of guides  
     * **For Loop** x p
       * **Int:** guide ID (global overall ID)
+    * **For Loop** x p
       * **Float:** guide weight
 * **Group (Optional)** --- 4b bytes
   * **For Loop** x b

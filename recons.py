@@ -215,7 +215,7 @@ if __name__ == "__main__":
         # initial frame section
         assert(data.idx_frame == out.tell())
         with open(data.file_reference, 'rb') as reffile:
-            reffile.seek(12)
+            reffile.seek(19*4)
             tmparr = array.array('f')
             tmparr.fromfile(reffile, 6*data.n_particle)
             tmparr.tofile(out)
