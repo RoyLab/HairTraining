@@ -36,7 +36,7 @@ if __name__ == "__main__":
     import os
     import common_tools as ctools
     from common_tools import setReadOnly
-    from local_para import *
+    from local_para_small import *
 
     oldenv = os.path.abspath('.')
     os.chdir(dumpFilePath)
@@ -139,7 +139,11 @@ if __name__ == "__main__":
             error0 = 0.0
             error = 0.0
             weights = []
-            for i in range(split+1):
+            if nStrand % split == 0:
+                nTotal = split
+            else:
+                nTotal = split + 1
+            for i in range(nTotal):
                 nImporter = ch.NormalHairHooker(guideData, refFrame, i, split, hairGroup)
                 nImporter.startLoop("precomputation %d / %d:" % (i+1, split))
                 nCache.loop(fileName, nImporter, nFrame)

@@ -2,4 +2,4 @@
 *.group
 *.dump
 *.anim*
-local_para.py
+local_para*.py

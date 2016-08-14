@@ -10,7 +10,7 @@ if __name__ == "__main__":
     from local_para import *
     import os
     os.chdir(dumpFilePath)
-    fileName = dumpedmgB
+    fileName = dumpedmgA
     exportName = sys.argv[1]
     assert(exportName != "")
 

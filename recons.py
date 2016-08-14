@@ -1,4 +1,4 @@
-from local_para import ReconsPara
+from local_para_small import ReconsPara, dumpFilePath
 import cPickle as pkl
 from common_tools import *
 
@@ -99,6 +99,8 @@ if __name__ == "__main__":
     import sys
     import array
 
+    import os
+    os.chdir(dumpFilePath)
     exportName = sys.argv[1]
     assert(exportName != "")
 
@@ -258,18 +260,3 @@ if __name__ == "__main__":
         if data.sectionFlag & data.maskIntpl:
             assert(data.idx_intpl == out.tell())
             out.write(data.file_interpolation)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
