@@ -1,10 +1,16 @@
 from numpy import *
-from math import sqrt
 
 # Input: expects Nx3 matrix of points
 # Returns R,t
 # R = 3x3 rotation matrix
 # t = 3x1 column vector
+
+def RtToMatrix(R, t):
+    trans3x4 = vstack([R.T, t]).T
+    return matrix(vstack([trans3x4, array([0, 0, 0, 1])]))
+
+def MatrixToRt(mat):
+    return mat[:3, :3], mat[:3, 3]
 
 def vector_rotation_3D_non_normalized(ref, cur):
     c = cur / linalg.norm(cur)

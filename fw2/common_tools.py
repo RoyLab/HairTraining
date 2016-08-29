@@ -1,5 +1,8 @@
-import os
-
+def tryGetPara(args, key, default = None):
+    try: res = args[key]
+    except KeyError:
+        res = default
+    return res
 
 def setReadOnly(fileName):
     os.system('attrib +r \"'+fileName+'\"')
