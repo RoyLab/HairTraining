@@ -578,7 +578,7 @@ class CacheFile:
         matcher = re.compile(self.m_baseFileName)
         dataFiles = []
         for afile in allFilesInDir:
-            if os.path.splitext(afile)[1] == ".mc" and matcher.match(afile) != None:
+            if os.path.splitext(afile)[1] == ".mcx" and matcher.match(afile) != None:
                 dataFiles.append(afile)
 
         for dataFile in dataFiles:

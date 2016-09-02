@@ -10,7 +10,7 @@ def RtToMatrix(R, t):
     return matrix(vstack([trans3x4, array([0, 0, 0, 1])]))
 
 def MatrixToRt(mat):
-    return mat[:3, :3], mat[:3, 3]
+    return mat[:3, :3], array(mat[:3, 3]).flatten()
 
 def vector_rotation_3D_non_normalized(ref, cur):
     c = cur / linalg.norm(cur)
@@ -64,9 +64,17 @@ def rigid_transform_3D(A, B):
 def rigid_trans_full(trans, state):
     return (state[0] * trans[0].T).A1 + trans[1], (state[1] * trans[0].T).A1
 
-def point_trans(trans, state):
-    '''trans = (R, t), state = (pos, tan)'''
-    return state[0] + trans[1], (state[1] * trans[0].T).A1
+def point_trans(state, R, t, batch=False):
+    '''state = (pos, tan)'''
+    if not batch:
+        return state[0] + t, (state[1] * R.T).A1
+
+    if batch == 1: # one state multi trans
+        t = array(t).flatten()
+        R = matrix(R).reshape((3, -1))
+        import ipdb; ipdb.set_trace()
+        nItem = t.size / 3
+        return tile(state[0], (nItem,)) + t, (state[1]*R.T).A1
 
 def rigid_trans_batch(trans, state):
     '''note this is different from point_trans_batch!!!!!'''
@@ -103,3 +111,16 @@ def squared_diff(s0, s1):
     diff_pos = s0[0] - s1[0]
     diff_dir = s0[1] - s1[1]
     return diff_pos.dot(diff_pos) + diff_dir.dot(diff_dir)
+
+def inverseRigidTrans(invR, trans, pos, dir, batch=False):
+    if not batch:
+        return (pos-trans)*invR.T, dir*invR.T
+
+    # multi state one trans
+    pos = array(pos)
+    dir = array(dir)
+    nItem = pos.size / 3
+    return (pos.reshape((nItem, 3)) - tile(trans, (nItem,1)))*invR.T,\
+        dir.reshape((nItem, 3))*invR.T
+
+
