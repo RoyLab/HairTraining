@@ -71,9 +71,9 @@ def point_trans(state, R, t, batch=False):
 
     if batch == 1: # one state multi trans
         t = array(t).flatten()
-        R = matrix(R).reshape((3, -1))
-        import ipdb; ipdb.set_trace()
         nItem = t.size / 3
+        R = R.reshape((nItem*3, 3))
+        R = matrix(R)
         return tile(state[0], (nItem,)) + t, (state[1]*R.T).A1
 
 def rigid_trans_batch(trans, state):

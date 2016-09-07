@@ -1,3 +1,22 @@
+class DumpEngine:
+    def __init__(self, path, postfix='.dump'):
+        self.path = unixPath(path)
+        self.postfix = postfix
+
+    def _fileName(self, idx):
+        return self.path+'/'+str(idx)+self.postfix
+
+    def dump(self, idx, obj):
+        import cPickle as pkl
+        pkl.dump(obj, open(self._fileName(idx), 'w'))
+
+    def load(self, idx):
+        import cPickle as pkl
+        return pkl.load(open(self._fileName(idx), 'r'))
+
+def unixPath(str):
+    return str.replace('\\', '/')
+
 def tryGetPara(args, key, default = None):
     try: res = args[key]
     except KeyError:
@@ -7,15 +26,6 @@ def tryGetPara(args, key, default = None):
 def setReadOnly(fileName):
     os.system('attrib +r \"'+fileName+'\"')
 
-def getDefaultLogger(fileName, lvl=None):
-    import logging
-    logObj = logging.getLogger()
-
-    if not lvl: lvl = logging.DEBUG
-    logging.basicConfig(filename=fileName, level=lvl, \
-        format='%(levelname)s:%(message)s')
-
-    return logObj
 
 def renameWithBase(name, length=3):
     import os
@@ -45,6 +55,19 @@ def renameWithBase(name, length=3):
 
     return prefix +  middle + postfix
 
+
+def setupDefaultLogger(fileName, rename=False, lvl=None):
+    import logging
+    logObj = logging.getLogger()
+
+    if rename:
+        fileName = renameWithBase(fileName, 3)
+
+    if not lvl: lvl = logging.DEBUG
+    logging.basicConfig(filename=fileName, level=lvl, \
+        format='%(levelname)s:%(message)s')
+
+    return logObj
 
 def writeBinary(f, para, content):
     from struct import pack
