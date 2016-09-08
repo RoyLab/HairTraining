@@ -1,3 +1,34 @@
+import sys
+
+def getTimeStr():
+    import time
+    return time.strftime('%m-%d %Hh%Mm%Ss', time.localtime(time.time()))
+
+def genRandomNonRepeatArray(n, N):
+    import numpy as np
+    import random
+    pool = np.arange(N)
+    res = np.empty(n)
+    last = N-1
+    for i in range(n):
+        val = random.randint(0, last)
+        res[i] = pool[val]
+        pool[val], pool[last] = pool[last], pool[val]
+        last -= 1
+
+    return res
+
+def printMP(lock, msg):
+    lock.acquire()
+    print msg
+    lock.release()
+
+def stdoutMP(lock, msg):
+    import sys
+    lock.acquire()
+    sys.stdout(msg)
+    lock.release()
+
 class DumpEngine:
     def __init__(self, path, postfix='.dump'):
         self.path = unixPath(path)

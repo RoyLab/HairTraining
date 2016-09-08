@@ -7,11 +7,9 @@ import sys
 from scipy.optimize import minimize
 from common_tools import *
 from progressbar import ProgressBar
+from multiprocessing import Pool, Manager, Lock
 
-import gc
 import crash_on_ipy
-import ipdb
-import cPickle as pkl
 
 def normalizePerColumn(X):
      X /= np.tile(np.sqrt((X*X).sum(axis=0)),(X.shape[0],1))
@@ -103,6 +101,69 @@ class XWrapper:
         else:
             return self.X[fId*self.offset:(fId+1)*self.offset, i].A1
 
+
+def runSCG(args):
+    fileName, spcereg, offset, seq, batch, l = args
+    reader = HairDataReader(fileName, {'type':'anim2'})
+    mat = []
+    reader.seek(seq*batch)
+    for i in xrange(batch):
+        frame = reader.getNextFrameNoRewind()
+        if not frame: break
+
+        pos = np.array(frame.position)
+        dir = np.array(frame.direction)
+        rigid = frame.headMotion
+        invR = np.linalg.inv(rigid[0])
+        pos, dir = cd.inverseRigidTrans(invR, rigid[1], pos, dir, batch=True)
+        pos.shape = -1, offset
+        dir.shape = -1, offset
+        mat.append(pos*spcereg)
+        mat.append(dir)
+
+    reader.close()
+    printMP(l, "Finish read batch %d..." % seq)
+    return seq, mat
+
+
+def SCGetMatrixAndHeaderMP(fileName, nFrame=None):
+    reader = HairDataReader(fileName, {'type':'anim2'})
+    factor = para.factor
+    offset = factor * 3
+    spcereg = para.lambda_balance  # regularize the space item
+    if not nFrame:
+        nFrame = reader.nFrame
+
+    pool = Pool()
+    m = Manager()
+    l = m.Lock()
+    batchsz = 10
+    job_args = [(fileName, spcereg, offset, i, batchsz, l) for i in xrange(nFrame/batchsz) ]
+    mat = pool.map(runSCG, job_args)
+
+    pool.close()
+    pool.join()
+    reader.close()
+
+    mat.sort(key=lambda x: x[0])
+    mat2 = []
+    for item in mat:
+        for arr in item[1]:
+            mat2.append(arr)
+
+    mat = None
+    X = np.hstack(mat2).transpose()
+    mat2 = None
+
+    print "\rFinished Reading!"
+
+    header = HairHeader()
+    header.nParticle = reader.nParticle
+    header.factor = factor
+    header.nHair = header.nParticle / factor
+
+    return X, header, XWrapper(X, offset*2)
+
 def SCGetMatrixAndHeader(fileName, nFrame=None):
     reader = HairDataReader(fileName, {'type':'anim2'})
     factor = para.factor
@@ -188,7 +249,6 @@ def selectByRandom(nGuide, X):
     from common_tools import genRandomNonRepeatArray
     N = X.shape[1]
     arr = genRandomNonRepeatArray(nGuide, N)
-    # import ipdb; ipdb.set_trace()
 
     return arr, genMatrixFromGuide(arr, X), nGuide
 
@@ -331,4 +391,15 @@ def guideSelect2016(fileName, nGuide):
         print "sum of error %f" % sumError
 
 if __name__ == "__main__":
-    guideSelect2016(r"D:\Data\c0524\c0514.anim2", 200)
+    nFrame = 200
+    fileName = r"D:\Data\c0524\c0514.anim2"
+    # X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame)  # X: len(u_s) x nHair
+
+    import time
+    t = time.time()
+    SCGetMatrixAndHeaderMP(fileName, nFrame)  # X: len(u_s) x nHair
+    print "MP: %f" % (time.time() - t)
+
+    t = time.time()
+    SCGetMatrixAndHeader(fileName, nFrame)
+    print "SP: %f" % (time.time() - t)

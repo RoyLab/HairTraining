@@ -35,6 +35,27 @@ class HairDataReader:
     def curFrame(self):
         return self.frameId
 
+    def getNextFrameNoRewind(self):
+        self.frameId += 1
+        if self.frameId >= self.nFrame:
+            return None
+
+        if self.type == "anim2":
+            readInt(self.file)
+            frame = FrameData()
+
+            tmp = array.array('f')
+            tmp.fromfile(self.file, 16)
+            frame.headMotion = MatrixToRt(np.matrix(tmp).reshape((4,4)))
+
+            frame.position = array.array('f')
+            frame.position.fromfile(self.file, self.nParticle*3)
+
+            frame.direction = array.array('f')
+            frame.direction.fromfile(self.file, self.nParticle*3)
+
+            return frame
+
     def getNextFrame(self):
         self.frameId += 1
         if self.frameId >= self.nFrame:
@@ -57,12 +78,18 @@ class HairDataReader:
             return frame
 
     def randomGetFrame(self, n):
+        self.seek(n)
+        self.getNextFrame()
+
+    def seek(self, n):
         if self.type == "anim2":
             tmp = self.start + self.offset * n
             self.file.seek(tmp)
-
         self.frameId = n-1
-        self.getNextFrame()
+
+    def close(self):
+        self.file.close()
+
 
 if __name__== "__main__":
     fileName = r"D:\Data\c0524\c0514.anim2"
