@@ -16,66 +16,74 @@ class HairHeader:
         self.factor = None
 
 class HairDataReader:
-    def __init__(self, fileName, args):
+    def __init__(self, fileName, args=None):
+        if args is None:
+            args = {'type':'anim2'}
+
         self.type = tryGetPara(args, "type")
+        if type(self.type) == str and self.type[0] == '.':
+            self.type = self.type[1:]
+
         if self.type == "anim2":
             self.file = open(fileName, 'rb')
             self.nFrame = readInt(self.file)
             self.nParticle = readInt(self.file)
             self.start = self.file.tell()
-            self.offset = 17*4 + 6*self.nParticle
-            self.frameId = None
+            self.offset = 4* (1+16 + 6*self.nParticle)
+            self.ptrPos = None
             self.rewind()
+
+            # get the offset for some frame start from 1
+            tmp = self.file.tell()
+            self.ptrOffset = readInt(self.file)
+            self.file.seek(tmp)
+
 
     def rewind(self):
         if self.type == "anim2":
             self.file.seek(self.start)
-        self.frameId = 0
-
-    def curFrame(self):
-        return self.frameId
+        self.ptrPos = 0
 
     def getNextFrameNoRewind(self):
-        self.frameId += 1
-        if self.frameId >= self.nFrame:
+        if self.ptrPos >= self.nFrame:
             return None
 
+        res = None
         if self.type == "anim2":
-            readInt(self.file)
-            frame = FrameData()
+            res = self._nextframeAnim2()
 
-            tmp = array.array('f')
-            tmp.fromfile(self.file, 16)
-            frame.headMotion = MatrixToRt(np.matrix(tmp).reshape((4,4)))
+        self.ptrPos += 1
+        return res
 
-            frame.position = array.array('f')
-            frame.position.fromfile(self.file, self.nParticle*3)
 
-            frame.direction = array.array('f')
-            frame.direction.fromfile(self.file, self.nParticle*3)
+    def _nextframeAnim2(self):
+        frameIdInFile = readInt(self.file)
+        assert self.ptrPos == frameIdInFile - self.ptrOffset
+        frame = FrameData()
 
-            return frame
+        tmp = array.array('f')
+        tmp.fromfile(self.file, 16)
+        frame.headMotion = MatrixToRt(np.matrix(tmp).reshape((4, 4)))
+
+        frame.position = array.array('f')
+        frame.position.fromfile(self.file, self.nParticle * 3)
+
+        frame.direction = array.array('f')
+        frame.direction.fromfile(self.file, self.nParticle * 3)
+
+        return frame
 
     def getNextFrame(self):
-        self.frameId += 1
-        if self.frameId >= self.nFrame:
+        if self.ptrPos >= self.nFrame:
             self.rewind()
 
+        res = None
         if self.type == "anim2":
-            readInt(self.file)
-            frame = FrameData()
+            res = self._nextframeAnim2()
 
-            tmp = array.array('f')
-            tmp.fromfile(self.file, 16)
-            frame.headMotion = MatrixToRt(np.matrix(tmp).reshape((4,4)))
+        self.ptrPos += 1
+        return res
 
-            frame.position = array.array('f')
-            frame.position.fromfile(self.file, self.nParticle*3)
-
-            frame.direction = array.array('f')
-            frame.direction.fromfile(self.file, self.nParticle*3)
-
-            return frame
 
     def randomGetFrame(self, n):
         self.seek(n)
@@ -85,7 +93,7 @@ class HairDataReader:
         if self.type == "anim2":
             tmp = self.start + self.offset * n
             self.file.seek(tmp)
-        self.frameId = n-1
+        self.ptrPos = n
 
     def close(self):
         self.file.close()
@@ -94,3 +102,7 @@ class HairDataReader:
 if __name__== "__main__":
     fileName = r"D:\Data\c0524\c0514.anim2"
     a = HairDataReader(fileName)
+    a.getNextFrame()
+
+    a.seek(3)
+    a.getNextFrame()

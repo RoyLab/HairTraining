@@ -2,6 +2,7 @@ import numpy as np
 from coordinates import *
 import cPickle as pkl
 
+n_particle_per_strand = 25
 
 class Frame:
 

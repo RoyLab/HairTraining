@@ -523,7 +523,7 @@ class CacheFile:
             if self.m_hooker:
                 self.m_hooker.newFrame()
 
-            frameCount+=1;
+            frameCount+=1
 
             # print "READ FRAME %d" % (frameCount)
 
@@ -595,15 +595,25 @@ class CacheFile:
     #   file per frame case ("OneFilePerFrame")
     def parseDataFilePerFrame(self):
 
-        raise Exception("not available!")
         allFilesInDir = os.listdir(self.m_directory)
         matcher = re.compile(self.m_baseFileName)
-        dataFiles = []
+        fileIndexPair = []
         for afile in allFilesInDir:
-            if os.path.splitext(afile)[1] == ".mc" and matcher.match(afile) != None:
-                dataFiles.append(afile)
+            parts = os.path.splitext(afile)
+            if parts[1] == ".mcx" and matcher.match(afile) != None:
+                id = eval(parts[0][len(self.m_baseFileName)+len('Frame'):])
+                fileIndexPair.append((id, afile))
+
+        print "Total Files: %d" % len(fileIndexPair)
+        fileIndexPair.sort(key = lambda x: x[0])
+
+        dataFiles = map(lambda x: x[1], fileIndexPair)
 
         for dataFile in dataFiles:
+
+            if self.m_hooker:
+                self.m_hooker.newFrame()
+
             self.m_glCount = 0
             self.m_tagSize = 4
             self.m_blockTypeSize = 4
@@ -681,6 +691,9 @@ class CacheFile:
                 fileFormatError()
 
             self.readData( fd, bytesRead, dataBlockSize, needSwap, tagFOR )
+
+            if self.m_hooker:
+                self.m_hooker.postFrame()
 
 def usage():
     print "Use -f to indicate the cache description file (.xml) you wish to parse\n"

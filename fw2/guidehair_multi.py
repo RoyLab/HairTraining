@@ -140,9 +140,7 @@ def SCGetMatrixAndHeaderMP(fileName, nFrame=None):
     batchsz = 10
     job_args = [(fileName, spcereg, offset, i, batchsz, l) for i in xrange(nFrame/batchsz) ]
     mat = pool.map(runSCG, job_args)
-
     pool.close()
-    pool.join()
     reader.close()
 
     mat.sort(key=lambda x: x[0])
@@ -161,7 +159,7 @@ def SCGetMatrixAndHeaderMP(fileName, nFrame=None):
     header.nParticle = reader.nParticle
     header.factor = factor
     header.nHair = header.nParticle / factor
-
+    assert(X.dtype==np.float64)
     return X, header, XWrapper(X, offset*2)
 
 def SCGetMatrixAndHeader(fileName, nFrame=None):
@@ -194,6 +192,7 @@ def SCGetMatrixAndHeader(fileName, nFrame=None):
     header.nHair = header.nParticle / factor
 
     X = np.hstack(mat).transpose()
+    assert(X.dtype==np.float64)
     return X, header, XWrapper(X, offset*2)
 
 def pickGuideHair(D, X):
@@ -264,34 +263,32 @@ def selectByChai2016(nGuide, X, initD=None):
     print "Got %d guide hairs" % nGuide
     return guide, D_bar, nGuide
 
-def guideSelect2016(fileName, nGuide):
+def guideSelect(fileName, nGuide, nFrame, stage, selFunc):
     '''main function'''
 
+    print "%s, Guide hairs: %d, frame: %d, stage %d"%(fileName, nGuide, nFrame, stage)
+
     #debug
-    nFrame = 200
     dump = DumpEngine("D:/tempDump")
-    stage = 2
-    setupDefaultLogger("D:/log/log.log")
 
     # global paramters
     xsima = para.xsima
     lambda1 = para.lambda1
 
-    X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame) # X: len(u_s) x nHair
-    X = X.astype('f')
+    X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, nFrame) # X: len(u_s) x nHair, float64
 
+    # select global guide
     if stage < 1:
         startTime = getTimeStr()
 
-        guide, D_bar, nGuide = selectByRandom(nGuide, X)
+        guide, D_bar, nGuide = selFunc(nGuide, X)
 
         params = {'lambda1':lambda1, 'lambda2':0, 'return_reg_path':False, 'pos':True}
         Us = np.asfortranarray(X, 'd')
         alpha = spams.lasso(Us, D = D_bar, **params) # alpha: nGuide x nHair
-        alpha = alpha.transpose()
-
-        # release half of the memory
         Us = None
+
+        alpha = alpha.transpose()
 
         guideSet = []
         print "Guide set per normal hair..."
@@ -310,7 +307,6 @@ def guideSelect2016(fileName, nGuide):
             bar.update(100*count/hairHeader.nHair)
         bar.finish()
 
-
         # load all guide hair information into memory
         offset = (hairHeader.factor * 6, hairHeader.factor * 3, 3)
         nFrame = X.shape[0]/offset[0]
@@ -321,8 +317,6 @@ def guideSelect2016(fileName, nGuide):
 
         print "Stage 0: start from "+ startTime
         print "Stage 0: ended at "+getTimeStr()
-
-        exit(0)
 
     if stage < 2:
         if stage == 1:
@@ -389,17 +383,18 @@ def guideSelect2016(fileName, nGuide):
                 sumError += error
 
         print "sum of error %f" % sumError
+        return sumError
 
 if __name__ == "__main__":
     nFrame = 200
     fileName = r"D:\Data\c0524\c0514.anim2"
     # X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame)  # X: len(u_s) x nHair
 
-    import time
-    t = time.time()
-    SCGetMatrixAndHeaderMP(fileName, nFrame)  # X: len(u_s) x nHair
-    print "MP: %f" % (time.time() - t)
-
-    t = time.time()
-    SCGetMatrixAndHeader(fileName, nFrame)
-    print "SP: %f" % (time.time() - t)
+    import logging
+    setupDefaultLogger("D:/log/log.log")
+    opts = [100, 200, 300, 400]
+    for o in opts:
+        e = guideSelect(fileName, o, nFrame, 0, selectByRandom)
+        logging.info("Random, %d guides: %f" % (o, e))
+        e = guideSelect(fileName, o, nFrame, 0, selectByChai2016)
+        logging.info("Chai, %d guides: %f" % (o, e))

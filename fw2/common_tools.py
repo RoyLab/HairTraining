@@ -100,6 +100,8 @@ def setupDefaultLogger(fileName, rename=False, lvl=None):
 
     return logObj
 
+
+
 def writeBinary(f, para, content):
     from struct import pack
     f.write(pack(para, content))
@@ -110,15 +112,15 @@ def writeInt(f, content):
 def writeFloat(f, content):
     writeBinary(f, 'f', content)
 
-def readBinary(f, para):
+def read4Bits(f, para):
     from struct import unpack
     return unpack(para, f.read(4))
 
 def readInt(f):
-    return readBinary(f, 'i')[0]
+    return read4Bits(f, 'i')[0]
 
 def readFloat(f):
-    return readBinary(f, 'f')[0]
+    return read4Bits(f, 'f')[0]
 
 if __name__ == "__main__":
     import os

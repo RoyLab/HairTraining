@@ -6,6 +6,8 @@ import array
 
 import crash_on_ipy
 
+
+
 class ConverterHooker(ch.Hooker):
     def __init__(self, fileName, needDirection=False):
         super(ConverterHooker, self).__init__()
@@ -65,7 +67,9 @@ class ConverterHooker(ch.Hooker):
 
 
 if __name__ == "__main__":
-    conv = ConverterHooker(r"D:\Data\minidebug\small200b.anim2", True)
+    import sys
+
+    conv = ConverterHooker(sys.argv[2], True)
     conv.startLoop("Convert to anim file:")
-    nCache.loop(r"D:\Data\minidebug\small200b.xml", conv, 200)
+    nCache.loop(sys.argv[1], conv, 200)
     conv.endLoop()
