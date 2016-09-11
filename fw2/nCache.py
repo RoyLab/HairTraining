@@ -628,12 +628,12 @@ class CacheFile:
                 tickNumber = int(frameAndTickNumber[1])
 
             timeInTicks = frameNumber*self.m_timePerFrame + tickNumber
-            print "--------------------------------------------------------------\n"
-            print "Data found at time %f seconds:\n"%(timeInTicks/6000.0)
+            # print "--------------------------------------------------------------\n"
+            # print "Data found at time %f seconds:\n"%(timeInTicks/6000.0)
 
             dataFile = self.m_directory + "/" + dataFile
-            print self.m_directory
-            print dataFile
+            # print self.m_directory
+            # print dataFile
             fd = open(dataFile,"rb")
             tagFOR = fd.read(4)
             self.m_glCount += 4
@@ -732,6 +732,8 @@ def _loop(fileName, hooker, number = None):
     else:
         print "unknown cache type!\n"
 
+    return number
+
 def loop(fileName, hooker, number=None):
     # try:
     #     (opts, args) = getopt.getopt(sys.argv[1:], "f:")
@@ -754,9 +756,9 @@ def loop(fileName, hooker, number=None):
 
     elif type(fileName) == list:
         if number is not None:
-            assert len(number) == len(fileName)
-            for f, n in zip(fileName, number):
-                _loop(f, hooker, n)
-        else:
-            for f in fileName:
-                _loop(f, hooker)
+            if type(number) == list:
+                map(lambda f, n: _loop(f, hooker, n), zip(fileName, number))
+            else:
+                frame = map(lambda f: _loop(f, hooker), fileName)
+                assert sum(frame) == number
+        else: map(lambda f: _loop(f, hooker), fileName)

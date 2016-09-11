@@ -1,7 +1,7 @@
 
-file1 = "E:/cache/329.xml"
-file2 = "../../maya cache/03074/hair_nRigidShape1.xml"
-file3 = "E:/c0418.xml"
+# file1 = "E:/cache/329.xml"
+# file2 = "../../maya cache/03074/hair_nRigidShape1.xml"
+# file3 = "E:/c0418.xml"
 # file3 = "D:/424.xml"
 
 if __name__ == "__main__":
@@ -29,14 +29,16 @@ if __name__ == "__main__":
                 needLoad = True
 
     import cPickle as pkl
+    sys.path.extend(["./fw2"])
     import nCache
+    sys.path.pop()
     import nCacheHooker as ch
     import GraphBuilder as gb
     import metis_graph as mg
     import os
     import common_tools as ctools
     from common_tools import setReadOnly
-    from local_para_small import *
+    from local_para import *
 
     oldenv = os.path.abspath('.')
     os.chdir(dumpFilePath)

@@ -11,19 +11,22 @@ class Hooker(object):
 
     def startLoop(self, title="start loop:"):
         print title
-        self.bar =  ProgressBar().start()
-        return
 
     def endLoop(self):
-        self.bar.finish()
+        pass
 
     def newFrame(self):
+        if self.i < 0:
+            print "Reading on cache."
+            self.bar =  ProgressBar().start()
         self.frame = Frame()
         self.i += 1
         return
 
     def postFrame(self):
         self.bar.update((self.i+1)*100/self.nFrame)
+        if self.i == self.nFrame-1:
+            self.bar.finish()
         return
 
     def dataHooker(self, name, sz, arr):
