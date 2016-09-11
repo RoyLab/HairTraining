@@ -698,26 +698,18 @@ class CacheFile:
 def usage():
     print "Use -f to indicate the cache description file (.xml) you wish to parse\n"
 
-def loop(fileName, hooker, number):
-    # try:
-    #     (opts, args) = getopt.getopt(sys.argv[1:], "f:")
-    # except getopt.error:
-    #     # print help information and exit:
-    #     usage()
-    #     sys.exit(2)
-    #
-    # if len(opts) == 0:
-    #     usage()
-    #     sys.exit(2)
-    #
-    # fileName = ""
-    # for o,a in opts:
-    #     if o == "-f":
-    #         fileName = a
-
+def _loop(fileName, hooker, number = None):
     cacheFile = CacheFile(fileName, number)
     cacheFile.m_hooker = hooker
+
+    nFrame = (cacheFile.m_cacheEndTime - cacheFile.m_cacheStartTime) / cacheFile.m_timePerFrame + 1
+    if number is None: number = nFrame
+    assert nFrame >= number
+    if number < nFrame:
+        print "~Warning: %s read only %d / %d frames!" % (fileName, number, nFrame)
+
     hooker.nFrame = number
+    print "Info: %s read %d frames!" % (fileName, number)
 
     if cacheFile.m_version > 2.0:
         print "Error: this script can only parse cache files of version 2 or lower\n"
@@ -739,3 +731,32 @@ def loop(fileName, hooker, number):
         cacheFile.parseDataOneFile()
     else:
         print "unknown cache type!\n"
+
+def loop(fileName, hooker, number=None):
+    # try:
+    #     (opts, args) = getopt.getopt(sys.argv[1:], "f:")
+    # except getopt.error:
+    #     # print help information and exit:
+    #     usage()
+    #     sys.exit(2)
+    #
+    # if len(opts) == 0:
+    #     usage()
+    #     sys.exit(2)
+    #
+    # fileName = ""
+    # for o,a in opts:
+    #     if o == "-f":
+    #         fileName = a
+
+    if type(fileName)==str:
+        _loop(fileName, hooker, number)
+
+    elif type(fileName) == list:
+        if number is not None:
+            assert len(number) == len(fileName)
+            for f, n in zip(fileName, number):
+                _loop(f, hooker, n)
+        else:
+            for f in fileName:
+                _loop(f, hooker)

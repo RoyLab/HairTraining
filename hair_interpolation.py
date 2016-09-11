@@ -119,6 +119,7 @@ class HairInterpolation20:
 if __name__ == "__main__":
     import cPickle as pkl
     import nCacheHooker as ch
+
     import nCache
     from progressbar import*
     import crash_on_ipy

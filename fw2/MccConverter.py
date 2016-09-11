@@ -144,29 +144,29 @@ def mccOneFileToAnim2(fileName, target, nFrame):
 
 def mccPerFrameToAnim2(fileName, target):
 
-    import os, re
-    fileName = os.path.abspath(fileName)
-    dirName = os.path.dirname(fileName)
-
-    baseName = os.path.basename(fileName).split('.')[0]
-    allFiles = os.listdir(dirName)
-    ids = []
-    matcher = re.compile(baseName)
-    nFrame = 0
-    for afile in allFiles:
-        parts = os.path.splitext(afile)
-        if (parts[1] == ".mcx" or parts[1] == ".mc") and matcher.match(afile) != None:
-            id = eval(parts[0][len(baseName) + len('Frame'):])
-            ids.append(id)
-            nFrame += 1
-
-    assert(nFrame == (max(ids)-min(ids)+1))
-
-    defaultLogInfo("Found ncache %d files!" % nFrame)
+    # import os, re
+    # fileName = os.path.abspath(fileName)
+    # dirName = os.path.dirname(fileName)
+    #
+    # baseName = os.path.basename(fileName).split('.')[0]
+    # allFiles = os.listdir(dirName)
+    # ids = []
+    # matcher = re.compile(baseName)
+    # nFrame = 0
+    # for afile in allFiles:
+    #     parts = os.path.splitext(afile)
+    #     if (parts[1] == ".mcx" or parts[1] == ".mc") and matcher.match(afile) != None:
+    #         id = eval(parts[0][len(baseName) + len('Frame'):])
+    #         ids.append(id)
+    #         nFrame += 1
+    #
+    # assert(nFrame == (max(ids)-min(ids)+1))
+    #
+    # defaultLogInfo("Found ncache %d files!" % nFrame)
 
     conv = ConverterHooker(target, True)
     conv.startLoop("Convert to anim file:")
-    nCache.loop(fileName, conv, nFrame)
+    nCache.loop(fileName, conv)
     conv.endLoop()
 
 
