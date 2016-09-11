@@ -386,8 +386,8 @@ def guideSelect(fileName, nGuide, nFrame, stage, selFunc):
         return sumError
 
 if __name__ == "__main__":
-    nFrame = 200
-    fileName = r"D:\Data\c0524\c0514.anim2"
+    nFrame = 500
+    fileName = r"D:\Data\20kcurly\total.anim2"
     # X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame)  # X: len(u_s) x nHair
 
     import logging

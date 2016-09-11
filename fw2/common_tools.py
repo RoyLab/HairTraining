@@ -100,7 +100,13 @@ def setupDefaultLogger(fileName, rename=False, lvl=None):
 
     return logObj
 
+def defaultLogInfo(msg):
+    import logging
+    logging.info(msg)
 
+def cmdLoggingDisp():
+    import logging
+    logging.getLogger().setLevel(logging.DEBUG)
 
 def writeBinary(f, para, content):
     from struct import pack

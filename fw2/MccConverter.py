@@ -9,7 +9,7 @@ import DataReader as DR
 import crash_on_ipy
 
 class nCacheHooker(object):
-    def __init__(self, number=None):
+    def __init__(self, number):
         self.nFrame = number
         self.i = -1
         return
@@ -37,12 +37,10 @@ class nCacheHooker(object):
 
 class ConverterHooker(nCacheHooker):
     def __init__(self, fileName, needDirection=False):
-        super(ConverterHooker, self).__init__()
-        # self.file = open(fileName, 'w')
+        super(ConverterHooker, self).__init__(None)
         self.fileb = open(fileName, 'wb')
         self.needDirection = needDirection
 
-        # if not self.file or not self.fileb:
         if not self.fileb:
             raise Exception("File not open!")
 
@@ -79,7 +77,7 @@ class ConverterHooker(nCacheHooker):
         if self.i == 0:
             self.reference = self.frame
 
-        # self.frame.calcRigidMotionMatrix(self.reference) # TODO need checking
+        self.frame.calcRigidMotionMatrix(self.reference)
         if self.needDirection:
             self.frame.calcParticleDirections()
 
@@ -105,6 +103,7 @@ def mergeAnim2(fileList, target):
 
         for i in range(cur.nFrame):
             buffer = cur.file.read(cur.offset)
+            assert buffer != '' and len(buffer) == cur.offset
             t.write(buffer)
             tmp = t.tell()
             t.seek(tmp-cur.offset)
@@ -118,6 +117,8 @@ def mergeAnim2(fileList, target):
     writeInt(t, frameId)
     t.close()
 
+    defaultLogInfo("Number of frames in total: %d" % frameId)
+
 
 def mergeAllAnim2(path, target):
     import os
@@ -130,11 +131,16 @@ def mergeAllAnim2(path, target):
     pattern = re.compile(r'.*\.anim2')
 
     fs = filter(lambda f: pattern.match(f) and f != target, fs)
-    logging.info("All files: " + ','.join(fs))
+    defaultLogInfo("All files: " + ','.join(fs))
 
     mergeAnim2(fs, target)
     os.chdir(old)
 
+def mccOneFileToAnim2(fileName, target, nFrame):
+    conv = ConverterHooker(target, True)
+    conv.startLoop("Convert to anim file:")
+    nCache.loop(fileName, conv, nFrame)
+    conv.endLoop()
 
 def mccPerFrameToAnim2(fileName, target):
 
@@ -156,7 +162,7 @@ def mccPerFrameToAnim2(fileName, target):
 
     assert(nFrame == (max(ids)-min(ids)+1))
 
-    logging.info("Found ncache %d files!" % nFrame)
+    defaultLogInfo("Found ncache %d files!" % nFrame)
 
     conv = ConverterHooker(target, True)
     conv.startLoop("Convert to anim file:")
@@ -167,18 +173,22 @@ def mccPerFrameToAnim2(fileName, target):
 if __name__ == "__main__":
     import sys
 
+    cmdLoggingDisp()
+
     # conv = ConverterHooker(sys.argv[2], True)
     # conv.startLoop("Convert to anim file:")
     # nCache.loop(sys.argv[1], conv, 200)
     # conv.endLoop()
 
-    # outputPath = r"D:\Data\20kcurly"
-    # inputPath = r"D:\Data\modelimport\cache\curly20k\anim"
-    #
-    # for i in range(6):
+    outputPath = r"D:\Data\20kcurly"
+    inputPath = r"D:\Data\modelimport\cache\curly20k\anim"
+
+    for i in range(6):
+        id = str(i+1)
+        mccPerFrameToAnim2(inputPath+id+r"\anim"+id+".xml", outputPath+r"\anim"+id+".anim2")
 
 
     # mccPerFrameToAnim2(sys.argv[1], sys.argv[2])
 
     args= [r"D:\Data", "t.anim2"]
-    mergeAllAnim2(args[0], args[1])
+    mergeAllAnim2(outputPath, "total.anim2")
