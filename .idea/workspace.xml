@@ -2,11 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f4e28263-9931-4360-a1e9-ea4da42f11dd" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/fw2/guidehair.py" afterPath="" />
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/fw2/guidehair_multi_dev.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fw2/DataReader.py" afterPath="$PROJECT_DIR$/fw2/DataReader.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fw2/MccConverter.py" afterPath="$PROJECT_DIR$/fw2/MccConverter.py" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fw2/coordinates.py" afterPath="$PROJECT_DIR$/fw2/coordinates.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fw2/guidehair_multi.py" afterPath="$PROJECT_DIR$/fw2/guidehair_multi.py" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/fw2/frame.py" afterPath="$PROJECT_DIR$/fw2/frame.py" />
     </list>
     <ignored path="HairTraining.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -30,18 +31,18 @@
       <file leaf-file-name="DataReader.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fw2/DataReader.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1080">
-              <caret line="57" column="37" selection-start-line="57" selection-start-column="37" selection-end-line="57" selection-end-column="37" />
+            <state relative-caret-position="2360">
+              <caret line="121" column="39" selection-start-line="121" selection-start-column="39" selection-end-line="121" selection-end-column="39" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="guidehair_multi.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="guidehair_multi.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fw2/guidehair_multi.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="572">
-              <caret line="403" column="0" selection-start-line="403" selection-start-column="0" selection-end-line="403" selection-end-column="0" />
+            <state relative-caret-position="-3648">
+              <caret line="204" column="24" selection-start-line="204" selection-start-column="24" selection-end-line="204" selection-end-column="24" />
               <folding>
                 <element signature="e#0#12#0" expanded="true" />
                 <element signature="e#1112#2698#0" expanded="false" />
@@ -50,10 +51,20 @@
           </provider>
         </entry>
       </file>
+      <file leaf-file-name="guidehair_multi_dev.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fw2/guidehair_multi_dev.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="-99">
+              <caret line="194" column="4" selection-start-line="194" selection-start-column="4" selection-end-line="194" selection-end-column="4" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
       <file leaf-file-name="common_tools.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fw2/common_tools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1780">
+            <state relative-caret-position="472">
               <caret line="89" column="0" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
               <folding />
             </state>
@@ -63,8 +74,28 @@
       <file leaf-file-name="coordinates.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/fw2/coordinates.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="320">
-              <caret line="16" column="66" selection-start-line="16" selection-start-column="66" selection-end-line="16" selection-end-column="66" />
+            <state relative-caret-position="510">
+              <caret line="70" column="0" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="MccConverter.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/fw2/MccConverter.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="260">
+              <caret line="39" column="0" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="frame.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/fw2/frame.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="350">
+              <caret line="125" column="33" selection-start-line="125" selection-start-column="33" selection-end-line="125" selection-end-column="33" />
               <folding />
             </state>
           </provider>
@@ -97,18 +128,20 @@
         <option value="$PROJECT_DIR$/fw2/local_para_small.py" />
         <option value="$PROJECT_DIR$/nCacheConverter.py" />
         <option value="$PROJECT_DIR$/fw2/nCacheHooker.py" />
-        <option value="$PROJECT_DIR$/fw2/frame.py" />
         <option value="$PROJECT_DIR$/fw2/testmp.py" />
         <option value="$PROJECT_DIR$/fw2/common_tools.py" />
         <option value="$PROJECT_DIR$/nCache.py" />
         <option value="$PROJECT_DIR$/hair_interpolation.py" />
         <option value="$PROJECT_DIR$/test.py" />
-        <option value="$PROJECT_DIR$/fw2/MccConverter.py" />
         <option value="$PROJECT_DIR$/fw2/nCache.py" />
         <option value="$PROJECT_DIR$/fw2/guidehair.py" />
-        <option value="$PROJECT_DIR$/fw2/coordinates.py" />
-        <option value="$PROJECT_DIR$/fw2/DataReader.py" />
         <option value="$PROJECT_DIR$/fw2/guidehair_multi.py" />
+        <option value="$PROJECT_DIR$/fw2/guidehair_multi_dev.py" />
+        <option value="$PROJECT_DIR$/fw2/DataReader.py" />
+        <option value="$PROJECT_DIR$/fw2/MccConverter.py" />
+        <option value="$PROJECT_DIR$/fw2/coordinates.py" />
+        <option value="$PROJECT_DIR$/fw2/frame.py" />
+        <option value="$PROJECT_DIR$/fw2/cacheFileExample.py" />
       </list>
     </option>
   </component>
@@ -233,24 +266,7 @@
       <recent name="D:\Codes\HairTraining\framework2.0" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.guidehair_multi">
-    <configuration default="false" name="testmp" type="PythonConfigurationType" factoryName="Python" temporary="true">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fw2" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="HairTraining" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fw2/testmp.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <method />
-    </configuration>
+  <component name="RunManager" selected="Python.guidehair_multi_dev">
     <configuration default="false" name="guidehair_multi" type="PythonConfigurationType" factoryName="Python" temporary="true">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -315,6 +331,23 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <module name="HairTraining" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <method />
+    </configuration>
+    <configuration default="false" name="guidehair_multi_dev" type="PythonConfigurationType" factoryName="Python" temporary="true">
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/fw2" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <module name="HairTraining" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/fw2/guidehair_multi_dev.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <method />
@@ -454,19 +487,19 @@
       <method />
     </configuration>
     <list size="5">
-      <item index="0" class="java.lang.String" itemvalue="Python.testmp" />
-      <item index="1" class="java.lang.String" itemvalue="Python.guidehair_multi" />
-      <item index="2" class="java.lang.String" itemvalue="Python.MccConverter" />
-      <item index="3" class="java.lang.String" itemvalue="Python.DataReader" />
-      <item index="4" class="java.lang.String" itemvalue="Python.test" />
+      <item index="0" class="java.lang.String" itemvalue="Python.guidehair_multi" />
+      <item index="1" class="java.lang.String" itemvalue="Python.MccConverter" />
+      <item index="2" class="java.lang.String" itemvalue="Python.DataReader" />
+      <item index="3" class="java.lang.String" itemvalue="Python.test" />
+      <item index="4" class="java.lang.String" itemvalue="Python.guidehair_multi_dev" />
     </list>
     <recent_temporary>
       <list size="5">
-        <item index="0" class="java.lang.String" itemvalue="Python.guidehair_multi" />
-        <item index="1" class="java.lang.String" itemvalue="Python.DataReader" />
-        <item index="2" class="java.lang.String" itemvalue="Python.test" />
-        <item index="3" class="java.lang.String" itemvalue="Python.MccConverter" />
-        <item index="4" class="java.lang.String" itemvalue="Python.testmp" />
+        <item index="0" class="java.lang.String" itemvalue="Python.guidehair_multi_dev" />
+        <item index="1" class="java.lang.String" itemvalue="Python.guidehair_multi" />
+        <item index="2" class="java.lang.String" itemvalue="Python.DataReader" />
+        <item index="3" class="java.lang.String" itemvalue="Python.test" />
+        <item index="4" class="java.lang.String" itemvalue="Python.MccConverter" />
       </list>
     </recent_temporary>
   </component>
@@ -550,35 +583,11 @@
           </properties>
         </breakpoint>
       </default-breakpoints>
-      <option name="time" value="165" />
+      <option name="time" value="168" />
     </breakpoint-manager>
-    <watches-manager>
-      <configuration name="PythonConfigurationType">
-        <watch expression="X" language="Python" />
-      </configuration>
-    </watches-manager>
+    <watches-manager />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/graph_exporter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/recons.md">
-      <provider editor-type-id="MarkdownFxPreviewEditor">
-        <state />
-      </provider>
-      <provider selected="true" editor-type-id="split-provider[text-editor;MarkdownPreviewEditor]">
-        <state split_layout="FIRST">
-          <first_editor relative-caret-position="140">
-            <caret line="22" column="31" selection-start-line="22" selection-start-column="31" selection-end-line="22" selection-end-column="31" />
-          </first_editor>
-          <second_editor />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/framework2.0/nCache.py" />
     <entry file="file://$PROJECT_DIR$/framework2.0/nCacheHooker.py" />
     <entry file="file://$PROJECT_DIR$/framework2.0/local_para_small.py" />
@@ -737,13 +746,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fw2/frame.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="298">
-          <caret line="121" column="8" selection-start-line="121" selection-start-column="8" selection-end-line="121" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/.PyCharm2016.1/system/python_stubs/-762174762/__builtin__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="210">
@@ -799,20 +801,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/nCacheHooker.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="660">
-          <caret line="114" column="41" selection-start-line="114" selection-start-column="41" selection-end-line="114" selection-end-column="41" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/fw2/MccConverter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="352">
-          <caret line="168" column="14" selection-start-line="168" selection-start-column="14" selection-end-line="168" selection-end-column="14" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/test.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="20">
@@ -828,38 +816,80 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fw2/guidehair.py" />
-    <entry file="file://$PROJECT_DIR$/fw2/common_tools.py">
+    <entry file="file://$PROJECT_DIR$/nCacheHooker.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1780">
-          <caret line="89" column="0" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
+        <state relative-caret-position="40">
+          <caret line="5" column="0" selection-start-line="5" selection-start-column="0" selection-end-line="37" selection-end-column="14" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fw2/MccConverter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="260">
+          <caret line="39" column="0" selection-start-line="39" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fw2/coordinates.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="320">
-          <caret line="16" column="66" selection-start-line="16" selection-start-column="66" selection-end-line="16" selection-end-column="66" />
+        <state relative-caret-position="510">
+          <caret line="70" column="0" selection-start-line="70" selection-start-column="0" selection-end-line="70" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/fw2/DataReader.py">
+    <entry file="file://$PROJECT_DIR$/fw2/common_tools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1080">
-          <caret line="57" column="37" selection-start-line="57" selection-start-column="37" selection-end-line="57" selection-end-column="37" />
+        <state relative-caret-position="472">
+          <caret line="89" column="0" selection-start-line="89" selection-start-column="0" selection-end-line="89" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/fw2/guidehair_multi.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="572">
-          <caret line="403" column="0" selection-start-line="403" selection-start-column="0" selection-end-line="403" selection-end-column="0" />
+        <state relative-caret-position="-3648">
+          <caret line="204" column="24" selection-start-line="204" selection-start-column="24" selection-end-line="204" selection-end-column="24" />
           <folding>
             <element signature="e#0#12#0" expanded="true" />
             <element signature="e#1112#2698#0" expanded="false" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fw2/DataReader.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2360">
+          <caret line="121" column="39" selection-start-line="121" selection-start-column="39" selection-end-line="121" selection-end-column="39" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fw2/guidehair_multi_dev.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-99">
+          <caret line="194" column="4" selection-start-line="194" selection-start-column="4" selection-end-line="194" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fw2/cacheFileExample.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="201">
+          <caret line="466" column="43" selection-start-line="466" selection-start-column="43" selection-end-line="466" selection-end-column="43" />
+          <folding>
+            <element signature="e#448#457#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/fw2/frame.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="350">
+          <caret line="125" column="33" selection-start-line="125" selection-start-column="33" selection-end-line="125" selection-end-column="33" />
+          <folding />
         </state>
       </provider>
     </entry>

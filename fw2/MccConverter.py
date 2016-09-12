@@ -9,31 +9,34 @@ import DataReader as DR
 import crash_on_ipy
 
 class nCacheHooker(object):
-    def __init__(self, number):
+    def __init__(self, number=None):
         self.nFrame = number
         self.i = -1
-        return
 
     def startLoop(self, title="start loop:"):
         print title
-        self.bar =  ProgressBar().start()
-        return
 
     def endLoop(self):
-        self.bar.finish()
+        pass
+
+    def resetPass(self):
+        self.i2 = -1
 
     def newFrame(self):
+        if self.i < 0:
+            print "Reading on cache."
+            self.bar =  ProgressBar().start()
         self.frame = Frame()
         self.i += 1
-        return
+        self.i2 += 1
 
     def postFrame(self):
-        self.bar.update((self.i+1)*100/self.nFrame)
-        return
+        self.bar.update((self.i2+1)*100/self.nFrame)
+        if self.i2 == self.nFrame-1:
+            self.bar.finish()
 
     def dataHooker(self, name, sz, arr):
         self.frame.loadIntoMemory(name, sz, arr)
-        return
 
 class ConverterHooker(nCacheHooker):
     def __init__(self, fileName, needDirection=False):
@@ -180,7 +183,7 @@ if __name__ == "__main__":
     # nCache.loop(sys.argv[1], conv, 200)
     # conv.endLoop()
 
-    outputPath = r"D:\Data\20kcurly"
+    outputPath = r"D:\Data\20kcurly2"
     inputPath = r"D:\Data\modelimport\cache\curly20k\anim"
 
     for i in range(6):

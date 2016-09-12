@@ -81,6 +81,7 @@ class HairDataReader:
 
         tmp = array.array('f')
         tmp.fromfile(self.file, 16)
+        print "rigid: %d \n"%self.ptrPos+str(np.array(tmp).reshape((4,4)))
         frame.headMotion = MatrixToRt(np.matrix(tmp).reshape((4, 4)))
 
         frame.position = array.array('f')
@@ -118,6 +119,6 @@ class HairDataReader:
 
 
 if __name__== "__main__":
-    fileName = r"D:\Data\20kcurly\total.anim2"
+    fileName = r"D:\Data\20kcurly\anim1.anim2"
     a = HairDataReader(fileName)
-    print a.boundingbox()
+    print a.bbox
