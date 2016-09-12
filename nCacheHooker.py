@@ -15,17 +15,21 @@ class Hooker(object):
     def endLoop(self):
         pass
 
+    def resetPass(self):
+        self.i2 = -1
+
     def newFrame(self):
         if self.i < 0:
             print "Reading on cache."
             self.bar =  ProgressBar().start()
         self.frame = Frame()
         self.i += 1
+        self.i2 += 1
         return
 
     def postFrame(self):
-        self.bar.update((self.i+1)*100/self.nFrame)
-        if self.i == self.nFrame-1:
+        self.bar.update((self.i2+1)*100/self.nFrame)
+        if self.i2 == self.nFrame-1:
             self.bar.finish()
         return
 

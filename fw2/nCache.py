@@ -725,6 +725,8 @@ def _loop(fileName, hooker, number = None):
     #     print   "startTime=%f seconds, endTime=%f seconds\n"%(channel.m_startTime/6000.0,channel.m_endTime/6000.0)
     # print "*******************************************************************************\n"
 
+    hooker.resetPass()
+
     if cacheFile.m_cacheType == "OneFilePerFrame":
         cacheFile.parseDataFilePerFrame()
     elif cacheFile.m_cacheType == "OneFile":
