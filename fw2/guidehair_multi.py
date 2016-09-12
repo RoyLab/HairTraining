@@ -102,24 +102,35 @@ class XWrapper:
             return self.X[fId*self.offset:(fId+1)*self.offset, i].A1
 
 
+def readEachFrame(reader, i, mat, offset, spcereg):
+    frame = reader.getNextFrameNoRewind()
+    if frame is None: return None
+
+    pos = np.array(frame.position)
+    dir = np.array(frame.direction)
+    rigid = frame.headMotion
+    invR = np.linalg.inv(rigid[0])
+    pos, dir = cd.inverseRigidTrans(invR, rigid[1], pos, dir, batch=True)
+    pos = reader.bbox.normalize(pos.A1, True)
+    pos = np.matrix(pos)
+    pos.shape = -1, offset
+    dir.shape = -1, offset
+
+    mat.append(pos * spcereg)
+    mat.append(dir)
+
+    return 0
+
 def runSCG(args):
     fileName, spcereg, offset, seq, batch, l = args
     reader = HairDataReader(fileName, {'type':'anim2'})
     mat = []
     reader.seek(seq*batch)
     for i in xrange(batch):
-        frame = reader.getNextFrameNoRewind()
-        if not frame: break
-
-        pos = np.array(frame.position)
-        dir = np.array(frame.direction)
-        rigid = frame.headMotion
-        invR = np.linalg.inv(rigid[0])
-        pos, dir = cd.inverseRigidTrans(invR, rigid[1], pos, dir, batch=True)
-        pos.shape = -1, offset
-        dir.shape = -1, offset
-        mat.append(pos*spcereg)
-        mat.append(dir)
+        res = readEachFrame(reader, i, mat, offset, spcereg)
+        if res is None:
+            logging.warning("Unexpected break at runSCG, frame %d" % i)
+            break
 
     reader.close()
     printMP(l, "Finish read batch %d..." % seq)
@@ -174,16 +185,12 @@ def SCGetMatrixAndHeader(fileName, nFrame=None):
     for i in xrange(nFrame):
         if i % 10 == 0:
             sys.stdout.write("\rReading frame %d..." % i)
-        frame = reader.getNextFrame()
-        pos = np.array(frame.position)
-        dir = np.array(frame.direction)
-        rigid = frame.headMotion
-        invR = np.linalg.inv(rigid[0])
-        pos, dir = cd.inverseRigidTrans(invR, rigid[1], pos, dir, batch=True)
-        pos.shape = -1, offset
-        dir.shape = -1, offset
-        mat.append(pos*spcereg)
-        mat.append(dir)
+
+        res = readEachFrame(reader, i, mat, offset, spcereg)
+        if res is None:
+            logging.warning("Unexpected break at SCGetMatrixAndHeader, frame %d" % i)
+            break
+
     print "\rFinished Reading!"
 
     header = HairHeader()
@@ -263,7 +270,7 @@ def selectByChai2016(nGuide, X, initD=None):
     print "Got %d guide hairs" % nGuide
     return guide, D_bar, nGuide
 
-def guideSelect(fileName, nGuide, nFrame, stage, selFunc):
+def guideSelect(fileName, nGuide, nFrame, stage, selFunc, parallel=True):
     '''main function'''
 
     print "%s, Guide hairs: %d, frame: %d, stage %d"%(fileName, nGuide, nFrame, stage)
@@ -275,7 +282,10 @@ def guideSelect(fileName, nGuide, nFrame, stage, selFunc):
     xsima = para.xsima
     lambda1 = para.lambda1
 
-    X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, nFrame) # X: len(u_s) x nHair, float64
+    if parallel:
+        X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, nFrame) # X: len(u_s) x nHair, float64
+    else:
+        X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame) # X: len(u_s) x nHair, float64
 
     # select global guide
     if stage < 1:
@@ -388,6 +398,8 @@ def guideSelect(fileName, nGuide, nFrame, stage, selFunc):
 if __name__ == "__main__":
     nFrame = 500
     fileName = r"D:\Data\20kcurly\total.anim2"
+
+
     # X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame)  # X: len(u_s) x nHair
 
     import logging

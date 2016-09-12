@@ -1,5 +1,21 @@
 from numpy import *
 
+
+class BoundingBox:
+    def __init__(self, value):
+        assert type(value) == list or type(value) == ndarray
+        self.bbox = array(value)
+        self.diag = max(self.bbox[-3:]-self.bbox[:3])/2
+        self.center = (self.bbox[-3:]+self.bbox[:3])/2
+
+    def normalize(self, x, batch=False):
+        if not batch:
+            assert len(x) == 3
+            return (x-self.center) / self.diag
+        else:
+            assert len(x.shape) == 1
+            return (x-tile(self.center, (len(x)/3, ))) / self.diag
+
 # Input: expects Nx3 matrix of points
 # Returns R,t
 # R = 3x3 rotation matrix
@@ -19,7 +35,7 @@ def vector_rotation_3D_non_normalized(ref, cur):
 
 # algorithm: http://math.stackexchange.com/questions/180418/calculate-rotation-matrix-to-align-vector-a-to-vector-b-in-3d
 def vector_rotation_3D(ref, cur):
-    v = cross(ref, cur);
+    v = cross(ref, cur)
     s = linalg.norm(v)
     c = dot(ref, cur)
     if abs(s - 0.) < 1e-10:
@@ -38,7 +54,7 @@ def rigid_transform_3D(A, B):
     '''A=reference state, B=current state'''
     assert len(A) == len(B)
 
-    N = A.shape[0]; # total points
+    N = A.shape[0] # total points
 
     centroid_A = mean(A, axis=0)
     centroid_B = mean(B, axis=0)

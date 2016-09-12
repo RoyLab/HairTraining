@@ -32,12 +32,30 @@ class HairDataReader:
             self.offset = 4* (1+16 + 6*self.nParticle)
             self.ptrPos = None
             self.rewind()
+            self.bbox = None
 
             # get the offset for some frame start from 1
             tmp = self.file.tell()
             self.ptrOffset = readInt(self.file)
             self.file.seek(tmp)
 
+            self.boundingbox()
+
+    def boundingbox(self):
+        tmp = self.ptrPos
+        self.rewind()
+        frame = self.getNextFrame()
+        bbox = None
+        if self.type == "anim2":
+            pos = np.array(frame.position)
+            pos.shape = -1, 3
+            bbox = []
+            for i in range(3):
+                bbox.append(min(pos[:,i]))
+                bbox.append(max(pos[:,i]))
+
+        self.seek(tmp)
+        self.bbox = BoundingBox(bbox)
 
     def rewind(self):
         if self.type == "anim2":
@@ -100,9 +118,6 @@ class HairDataReader:
 
 
 if __name__== "__main__":
-    fileName = r"D:\Data\c0524\c0514.anim2"
+    fileName = r"D:\Data\20kcurly\total.anim2"
     a = HairDataReader(fileName)
-    a.getNextFrame()
-
-    a.seek(3)
-    a.getNextFrame()
+    print a.boundingbox()
