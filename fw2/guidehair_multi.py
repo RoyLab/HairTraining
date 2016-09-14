@@ -1,4 +1,4 @@
-import spams
+import spams, logging
 import numpy as np
 from DataReader import HairDataReader, HairHeader
 import local_para_small as para
@@ -121,13 +121,44 @@ def readEachFrame(reader, i, mat, offset, spcereg):
 
     return 0
 
+gx = None
+gxp = None
+
+def readEachFrameNoDir(reader, i, mat, offset, spcereg):
+    frame = reader.getNextFrameNoRewind()
+    if frame is None: return None
+
+    pos = np.array(frame.position)
+    dir = np.array(frame.direction)
+    rigid = frame.headMotion
+    invR = np.linalg.inv(rigid[0])
+    pos, dir = cd.inverseRigidTrans(invR, rigid[1], pos, dir, batch=True)
+    if i == 0:
+        global gx
+        gx = pos
+    if i == 16:
+        import ipdb; ipdb.set_trace()
+
+    pos = reader.bbox.normalize(pos.A1, True)
+
+    if i == 0:
+        global gxp
+        gxp = pos
+
+    pos = np.matrix(pos)
+    pos.shape = -1, offset
+
+    mat.append(pos * spcereg)
+
+    return 0
+
 def runSCG(args):
-    fileName, spcereg, offset, seq, batch, l = args
+    fileName, spcereg, offset, seq, batch, l, readIterFunc = args
     reader = HairDataReader(fileName, {'type':'anim2'})
     mat = []
     reader.seek(seq*batch)
     for i in xrange(batch):
-        res = readEachFrame(reader, i, mat, offset, spcereg)
+        res = readIterFunc(reader, i, mat, offset, spcereg)
         if res is None:
             logging.warning("Unexpected break at runSCG, frame %d" % i)
             break
@@ -137,7 +168,7 @@ def runSCG(args):
     return seq, mat
 
 
-def SCGetMatrixAndHeaderMP(fileName, nFrame=None):
+def SCGetMatrixAndHeaderMP(fileName, readIterFunc, nFrame=None):
     reader = HairDataReader(fileName, {'type':'anim2'})
     factor = para.factor
     offset = factor * 3
@@ -145,11 +176,13 @@ def SCGetMatrixAndHeaderMP(fileName, nFrame=None):
     if not nFrame:
         nFrame = reader.nFrame
 
+    print "Reading frame %d :" % nFrame
+
     pool = Pool()
     m = Manager()
     l = m.Lock()
     batchsz = 10
-    job_args = [(fileName, spcereg, offset, i, batchsz, l) for i in xrange(nFrame/batchsz) ]
+    job_args = [(fileName, spcereg, offset, i, batchsz, l, readIterFunc) for i in xrange(nFrame/batchsz) ]
     mat = pool.map(runSCG, job_args)
     pool.close()
     reader.close()
@@ -173,7 +206,7 @@ def SCGetMatrixAndHeaderMP(fileName, nFrame=None):
     assert(X.dtype==np.float64)
     return X, header, XWrapper(X, offset*2)
 
-def SCGetMatrixAndHeader(fileName, nFrame=None):
+def SCGetMatrixAndHeader(fileName, readIterFunc, nFrame=None):
     reader = HairDataReader(fileName, {'type':'anim2'})
     factor = para.factor
     offset = factor * 3
@@ -182,11 +215,12 @@ def SCGetMatrixAndHeader(fileName, nFrame=None):
         nFrame = reader.nFrame
 
     mat = []
+    print "Reading frame %d :" % nFrame
     for i in xrange(nFrame):
         if i % 10 == 0:
             sys.stdout.write("\rReading frame %d..." % i)
 
-        res = readEachFrame(reader, i, mat, offset, spcereg)
+        res = readIterFunc(reader, i, mat, offset, spcereg)
         if res is None:
             logging.warning("Unexpected break at SCGetMatrixAndHeader, frame %d" % i)
             break
@@ -208,16 +242,12 @@ def pickGuideHair(D, X):
     nHair = X.shape[0]
     nGuide = D.shape[0]
 
-    #return range(nGuide), D.transpose(), nGuide
-
     guide = []; guideSet = set([])
-    newD = []
     print "Guide hair selection..."
     bar = ProgressBar().start()
     for d in range(nGuide):
         sel = -1
         minDist = 1e20
-        dvec_bar = None
         dvec = D[d]
 
         # normalize
@@ -235,12 +265,11 @@ def pickGuideHair(D, X):
         if sel not in guideSet:
             guide.append(sel)
             guideSet.add(sel)
-            newD.append(dvec_bar)
         bar.update(100*(d+1)/nGuide)
 
     bar.finish()
 
-    return np.array(guide), np.asfortranarray(np.array(newD, 'd').transpose()), len(guide)
+    return np.array(guide), len(guide)
 
 def genMatrixFromGuide(guide, X):
     newD = []
@@ -251,24 +280,40 @@ def genMatrixFromGuide(guide, X):
 
     return np.asfortranarray(np.array(newD, 'd').transpose())
 
-def selectByRandom(nGuide, X):
+def selectByRandom(nGuide, fileName, parallel, nFrame):
+    if parallel:
+        X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, readEachFrame, nFrame) # X: len(u_s) x nHair, float64
+    else:
+        X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrame, nFrame) # X: len(u_s) x nHair, float64
+
     from common_tools import genRandomNonRepeatArray
     N = X.shape[1]
     arr = genRandomNonRepeatArray(nGuide, N)
 
-    return arr, genMatrixFromGuide(arr, X), nGuide
+    return arr, nGuide
 
-def selectByChai2016(nGuide, X, initD=None):
+def selectByChai2016(nGuide, fileName, parallel, nFrame, initD=None):
+    if parallel:
+        X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, readEachFrameNoDir, nFrame) # X: len(u_s) x nHair, float64
+    else:
+        X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrameNoDir, nFrame) # X: len(u_s) x nHair, float64
+
+    offset = hairHeader.factor * 3
+
+    X0 = X[:offset, :]
+    X = X[offset:, :] - np.tile(X0, (nFrame-1, 1))
+
+
     lambda1 = para.lambda1
     Us = np.asfortranarray(X, 'd')
 
     params = {'lambda1': lambda1, 'lambda2': 0, 'return_model': True, 'model': None, 'posAlpha': True}
     D, ABi = spams.trainDL(Us, D=initD, K=nGuide, iter=100, batchsize=10, **params)  # D: len(u_s) x nGuide
 
-    guide, D_bar, nGuide = pickGuideHair(D, X)
+    guide, nGuide = pickGuideHair(D, X)
 
     print "Got %d guide hairs" % nGuide
-    return guide, D_bar, nGuide
+    return guide, nGuide
 
 def guideSelect(fileName, nGuide, nFrame, stage, selFunc, parallel=True):
     '''main function'''
@@ -276,137 +321,137 @@ def guideSelect(fileName, nGuide, nFrame, stage, selFunc, parallel=True):
     print "%s, Guide hairs: %d, frame: %d, stage %d"%(fileName, nGuide, nFrame, stage)
 
     #debug
-    dump = DumpEngine("D:/tempDump")
+    # dump = DumpEngine("D:/tempDump")
 
     # global paramters
     xsima = para.xsima
     lambda1 = para.lambda1
 
-    if parallel:
-        X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, nFrame) # X: len(u_s) x nHair, float64
-    else:
-        X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame) # X: len(u_s) x nHair, float64
-
     # select global guide
-    if stage < 1:
-        startTime = getTimeStr()
+    startTime = getTimeStr()
+    guide, nGuide = selFunc(nGuide, fileName, parallel, nFrame)
 
-        guide, D_bar, nGuide = selFunc(nGuide, X)
+    if parallel:
+        X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, readEachFrame, nFrame) # X: len(u_s) x nHair, float64
+    else:
+        X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrame, nFrame) # X: len(u_s) x nHair, float64
 
-        params = {'lambda1':lambda1, 'lambda2':0, 'return_reg_path':False, 'pos':True}
-        Us = np.asfortranarray(X, 'd')
-        alpha = spams.lasso(Us, D = D_bar, **params) # alpha: nGuide x nHair
-        Us = None
+    D_bar = genMatrixFromGuide(guide, X)
+    params = {'lambda1':lambda1, 'lambda2':0, 'return_reg_path':False, 'pos':True}
+    Us = np.asfortranarray(X, 'd')
+    alpha = spams.lasso(Us, D = D_bar, **params) # alpha: nGuide x nHair
+    Us = None
 
-        alpha = alpha.transpose()
+    alpha = alpha.transpose()
 
-        guideSet = []
-        print "Guide set per normal hair..."
-        bar = ProgressBar().start()
-        count = 0
-        for coef in alpha:
-            count += 1
-            tmp = []
-            nnz = coef.nonzero()
-            nnzCount = coef.count_nonzero()
-            for i in range(nnzCount):
-                val = coef.data[i]
-                if val > xsima:
-                    tmp.append(guide[nnz[1][i]])
-            guideSet.append(tmp)
-            bar.update(100*count/hairHeader.nHair)
-        bar.finish()
+    guideSet = []
+    print "Guide set per normal hair..."
+    bar = ProgressBar().start()
+    count = 0
+    for coef in alpha:
+        count += 1
+        tmp = []
+        nnz = coef.nonzero()
+        nnzCount = coef.count_nonzero()
+        for i in range(nnzCount):
+            val = coef.data[i]
+            if val > xsima:
+                tmp.append(guide[nnz[1][i]])
+        guideSet.append(tmp)
+        bar.update(100*count/hairHeader.nHair)
+    bar.finish()
 
-        # load all guide hair information into memory
-        offset = (hairHeader.factor * 6, hairHeader.factor * 3, 3)
-        nFrame = X.shape[0]/offset[0]
-        # assert(nFrame == para.nFrame and hairHeader.factor == para.factor)
+    # load all guide hair information into memory
+    offset = (hairHeader.factor * 6, hairHeader.factor * 3, 3)
+    nFrame = X.shape[0]/offset[0]
+    # assert(nFrame == para.nFrame and hairHeader.factor == para.factor)
 
-        dump.dump(1, (guide, offset, nFrame))
-        dump.dump(2, guideSet)
+    # dump.dump(1, (guide, offset, nFrame))
+    # dump.dump(2, guideSet)
 
-        print "Stage 0: start from "+ startTime
-        print "Stage 0: ended at "+getTimeStr()
+    print "Stage 0: start from "+ startTime
+    print "Stage 0: ended at "+getTimeStr()
 
-    if stage < 2:
-        if stage == 1:
-            guide, offset, nFrame = dump.load(1)
+    # if stage < 2:
+    #     if stage == 1:
+    #         guide, offset, nFrame = dump.load(1)
 
-        BgDictR = dict.fromkeys(guide) # nframe * (factor - 1) * 3 * 3
-        BgDictT = dict.fromkeys(guide) # nframe * (factor - 1) * 3
-        guideList = guide.tolist()
-        for g in guide:
-            print "load guide hair matrix %d ..." % guideList.index(g)
-            s0 = X[:offset[0],g].A1
-            slotR = []
-            slotT = []
-            for i in range(nFrame):
-                tmpR = []
-                tmpT = []
-                sp = X[offset[0]*i:offset[0]*(i+1), g].A1
-                for j in range(1, hairHeader.factor):
-                    ps0 = (s0[j*offset[2]:(j+1)*offset[2]], s0[offset[1]+j*offset[2]:offset[1]+(j+1)*offset[2]])
-                    psp = (sp[j*offset[2]:(j+1)*offset[2]], sp[offset[1]+j*offset[2]:offset[1]+(j+1)*offset[2]])
+    BgDictR = dict.fromkeys(guide) # nframe * (factor - 1) * 3 * 3
+    BgDictT = dict.fromkeys(guide) # nframe * (factor - 1) * 3
+    guideList = guide.tolist()
+    for g in guide:
+        print "load guide hair matrix %d ..." % guideList.index(g)
+        s0 = X[:offset[0],g].A1
+        slotR = []
+        slotT = []
+        for i in range(nFrame):
+            tmpR = []
+            tmpT = []
+            sp = X[offset[0]*i:offset[0]*(i+1), g].A1
+            for j in range(1, hairHeader.factor):
+                ps0 = (s0[j*offset[2]:(j+1)*offset[2]], s0[offset[1]+j*offset[2]:offset[1]+(j+1)*offset[2]])
+                psp = (sp[j*offset[2]:(j+1)*offset[2]], sp[offset[1]+j*offset[2]:offset[1]+(j+1)*offset[2]])
 
-                    tmpR.append(cd.vector_rotation_3D(ps0[1], psp[1]))
-                    tmpT.append(psp[0] - ps0[0])
-                slotR.append(tuple(tmpR))
-                slotT.append(tuple(tmpT))
-            BgDictR[g] = np.array(slotR)
-            BgDictT[g] = np.array(slotT)
+                tmpR.append(cd.vector_rotation_3D(ps0[1], psp[1]))
+                tmpT.append(psp[0] - ps0[0])
+            slotR.append(tuple(tmpR))
+            slotT.append(tuple(tmpT))
+        BgDictR[g] = np.array(slotR)
+        BgDictT[g] = np.array(slotT)
 
-        dump.dump(3, (BgDictR, BgDictT))
+        # dump.dump(3, (BgDictR, BgDictT))
+    #
+    # if stage < 3:
+    #     if stage == 2:
+    #         BgDictR, BgDictT= dump.load(3)
+    #         guideSet = dump.load(2)
+    #         guide, offset, nFrame = dump.load(1)
 
-    if stage < 3:
-        if stage == 2:
-            BgDictR, BgDictT= dump.load(3)
-            guideSet = dump.load(2)
-            guide, offset, nFrame = dump.load(1)
+    # compute the weight
+    cons = ({'type': 'eq',
+             'fun': lambda x: np.sum(x) - 1.0,
+             'jac': lambda x: np.ones(len(x))
+             },
+            {'type': 'ineq',
+             'fun': lambda x: x,
+             'jac': lambda x: np.identity(len(x))
+             })
 
-        # compute the weight
-        cons = ({'type': 'eq',
-                 'fun': lambda x: np.sum(x) - 1.0,
-                 'jac': lambda x: np.ones(len(x))
-                 },
-                {'type': 'ineq',
-                 'fun': lambda x: x,
-                 'jac': lambda x: np.identity(len(x))
-                 })
+    sumError = 0.0
+    for i in xrange(hairHeader.nHair):
+        if i in guide:
+            continue
 
-        sumError = 0.0
-        for i in xrange(hairHeader.nHair):
-            if i in guide:
-                continue
+        print "Compute weight of normal %d ..." % i
 
-            print "Compute weight of normal %d ..." % i
+        ghairs = guideSet[i]
+        sfs = Data.getState(i).reshape((nFrame, 2, hairHeader.factor, 3))
+        BgRs = np.array(map(lambda g: BgDictR[g], ghairs))
+        BgTs = np.array(map(lambda g: BgDictT[g], ghairs))
 
-            ghairs = guideSet[i]
-            sfs = Data.getState(i).reshape((nFrame, 2, hairHeader.factor, 3))
-            BgRs = np.array(map(lambda g: BgDictR[g], ghairs))
-            BgTs = np.array(map(lambda g: BgDictT[g], ghairs))
+        for j in range(1, hairHeader.factor): # we do not compute the weight of root particle
+            sf = sfs[:, :, j, :]
+            R = BgRs[:, :, j-1, :, :]
+            T = BgTs[:, :, j-1, :]
+            res, error = estimateWeight(sf, R, T, cons)
+            sumError += error
 
-            for j in range(1, hairHeader.factor): # we do not compute the weight of root particle
-                sf = sfs[:, :, j, :]
-                R = BgRs[:, :, j-1, :, :]
-                T = BgTs[:, :, j-1, :]
-                res, error = estimateWeight(sf, R, T, cons)
-                sumError += error
-
-        print "sum of error %f" % sumError
-        return sumError
+    print "sum of error %f" % sumError
+    return sumError
 
 if __name__ == "__main__":
     nFrame = 500
-    fileName = r"D:\Data\20kcurly\total.anim2"
+    fileName = r"D:\Data\20kcurly2\total.anim2"
 
+    #X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrameNoDir, 20)  # X: len(u_s) x nHair
+    guideSelect(fileName, 200, 20, 0, selectByChai2016, False)
 
-    # X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame)  # X: len(u_s) x nHair
-
-    import logging
-    setupDefaultLogger("D:/log/log.log")
-    opts = [100, 200, 300, 400]
-    for o in opts:
-        e = guideSelect(fileName, o, nFrame, 0, selectByRandom)
-        logging.info("Random, %d guides: %f" % (o, e))
-        e = guideSelect(fileName, o, nFrame, 0, selectByChai2016)
-        logging.info("Chai, %d guides: %f" % (o, e))
+    # import logging
+    # setupDefaultLogger("D:/log/log.log")
+    # opts = [100, 200, 300, 400]
+    # for o in opts:
+    #     e = guideSelect(fileName, o, nFrame, 0, selectByRandom)
+    #     logging.info("Random, %d guides: %f" % (o, e))
+    #     e = guideSelect(fileName, o, nFrame, 0, selectByChai2016)
+    #     logging.info("Chai, %d guides: %f" % (o, e))
+    exit(0)

@@ -34,16 +34,16 @@ class Frame:
 
         if (headVertex.match(name)):
             self.n_headVertex = int(sz)
-            self.headData = np.array(data)
-            self.headData.resize(len(data)/3, 3)
+            self.headData = np.array(data).reshape((-1, 3))
 
         elif (hairCounts.match(name)):
             self.n_hair = int(data[0])
             self.n_particle = self.n_hair * n_particle_per_strand
 
         elif (vertexPositions.match(name)):
-            self.data = np.array(data)
-            self.data.resize(self.n_particle, 3)
+            self.data = np.array(data).reshape((-1, 3))
+            tmp = self.data.reshape((self.n_hair, -1))
+            self.headData2 = tmp[:, :3].reshape((-1, 3))
 
         self.count += 1
 
@@ -121,8 +121,11 @@ class Frame:
 
     def calcRigidMotionMatrix(self, reference):
         self.reference = reference
-        rigid = rigid_transform_3D(matrix(reference.headData), matrix(self.headData))
+        rigid = rigid_transform_3D(matrix(reference.headData2), matrix(self.headData2))
         self.rigid_motion = rigid
+        import logging
+        logging.debug(str(rigid))
+        #print rigid
         self._calcRigid()
 
     def _calcRigid(self):

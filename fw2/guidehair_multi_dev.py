@@ -121,6 +121,9 @@ def readEachFrame(reader, i, mat, offset, spcereg):
 
     return 0
 
+gx = None
+gxp = None
+
 def readEachFrameNoDir(reader, i, mat, offset, spcereg):
     frame = reader.getNextFrameNoRewind()
     if frame is None: return None
@@ -130,7 +133,18 @@ def readEachFrameNoDir(reader, i, mat, offset, spcereg):
     rigid = frame.headMotion
     invR = np.linalg.inv(rigid[0])
     pos, dir = cd.inverseRigidTrans(invR, rigid[1], pos, dir, batch=True)
+    if i == 0:
+        global gx
+        gx = pos
+    if i == 16:
+        import ipdb; ipdb.set_trace()
+
     pos = reader.bbox.normalize(pos.A1, True)
+
+    if i == 0:
+        global gxp
+        gxp = pos
+
     pos = np.matrix(pos)
     pos.shape = -1, offset
 
@@ -286,12 +300,9 @@ def selectByChai2016(nGuide, fileName, parallel, nFrame, initD=None):
 
     offset = hairHeader.factor * 3
 
-    import ipdb;
-    ipdb.set_trace()
     X0 = X[:offset, :]
     X = X[offset:, :] - np.tile(X0, (nFrame-1, 1))
 
-    import ipdb; ipdb.set_trace()
     lambda1 = para.lambda1
     Us = np.asfortranarray(X, 'd')
 
@@ -429,7 +440,7 @@ def guideSelect(fileName, nGuide, nFrame, stage, selFunc, parallel=True):
 
 if __name__ == "__main__":
     nFrame = 500
-    fileName = r"D:\Data\20kcurly\total.anim2"
+    fileName = r"D:\Data\20kcurly2\total.anim2"
 
     X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrameNoDir, 20)  # X: len(u_s) x nHair
     #guideSelect(fileName, 200, 20, 0, selectByChai2016, False)
@@ -442,5 +453,4 @@ if __name__ == "__main__":
     #     logging.info("Random, %d guides: %f" % (o, e))
     #     e = guideSelect(fileName, o, nFrame, 0, selectByChai2016)
     #     logging.info("Chai, %d guides: %f" % (o, e))
-    import ipdb; ipdb.set_trace()
     exit(0)

@@ -176,7 +176,8 @@ def mccPerFrameToAnim2(fileName, target):
 if __name__ == "__main__":
     import sys
 
-    cmdLoggingDisp()
+    # cmdLoggingDisp()
+    setupDefaultLogger("D:/log/log2.log")
 
     # conv = ConverterHooker(sys.argv[2], True)
     # conv.startLoop("Convert to anim file:")
@@ -195,3 +196,19 @@ if __name__ == "__main__":
 
     args= [r"D:\Data", "t.anim2"]
     mergeAllAnim2(outputPath, "total.anim2")
+
+    nFrame = 500
+    fileName = r"D:\Data\20kcurly2\total.anim2"
+
+
+    # X, hairHeader, Data = SCGetMatrixAndHeader(fileName, nFrame)  # X: len(u_s) x nHair
+
+    import guidehair_multi_dev as dev
+    import logging
+    setupDefaultLogger("D:/log/log3.log")
+    opts = [100, 200, 300, 400]
+    for o in opts:
+        e = dev.guideSelect(fileName, o, nFrame, 0,  dev.selectByRandom)
+        logging.info("Random, %d guides: %f" % (o, e))
+        e =  dev.guideSelect(fileName, o, nFrame, 0,  dev.selectByChai2016)
+        logging.info("Chai, %d guides: %f" % (o, e))

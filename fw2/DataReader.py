@@ -81,7 +81,6 @@ class HairDataReader:
 
         tmp = array.array('f')
         tmp.fromfile(self.file, 16)
-        print "rigid: %d \n"%self.ptrPos+str(np.array(tmp).reshape((4,4)))
         frame.headMotion = MatrixToRt(np.matrix(tmp).reshape((4, 4)))
 
         frame.position = array.array('f')
