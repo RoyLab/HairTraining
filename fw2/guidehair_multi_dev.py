@@ -121,9 +121,6 @@ def readEachFrame(reader, i, mat, offset, spcereg):
 
     return 0
 
-gx = None
-gxp = None
-
 def readEachFrameNoDir(reader, i, mat, offset, spcereg):
     frame = reader.getNextFrameNoRewind()
     if frame is None: return None
@@ -133,17 +130,7 @@ def readEachFrameNoDir(reader, i, mat, offset, spcereg):
     rigid = frame.headMotion
     invR = np.linalg.inv(rigid[0])
     pos, dir = cd.inverseRigidTrans(invR, rigid[1], pos, dir, batch=True)
-    if i == 0:
-        global gx
-        gx = pos
-    if i == 16:
-        import ipdb; ipdb.set_trace()
-
     pos = reader.bbox.normalize(pos.A1, True)
-
-    if i == 0:
-        global gxp
-        gxp = pos
 
     pos = np.matrix(pos)
     pos.shape = -1, offset
@@ -236,7 +223,7 @@ def SCGetMatrixAndHeader(fileName, readIterFunc, nFrame=None):
     assert(X.dtype==np.float64)
     return X, header, XWrapper(X, offset*2)
 
-def pickGuideHair(D, X):
+def pickGuideHair(D, X, sc=(lambda x: np.linalg.norm(x[-3:])), sc2=(lambda x: 1)):
     D = D.transpose()
     X = X.transpose()
     nHair = X.shape[0]
@@ -249,14 +236,12 @@ def pickGuideHair(D, X):
         sel = -1
         minDist = 1e20
         dvec = D[d]
-
-        # normalize
-        scale = np.linalg.norm(dvec[-3:])
-        dvec /= scale
+        dscale = sc(dvec)
 
         for hair in xrange(nHair):
             hvec = X[hair].A1
-            diff = np.linalg.norm(dvec-hvec)
+            hscale = sc2(hvec)
+            diff = np.linalg.norm(dvec/dscale-hvec/hscale)
             if minDist > diff:
                 minDist = diff
                 sel = hair
@@ -292,7 +277,7 @@ def selectByRandom(nGuide, fileName, parallel, nFrame):
 
     return arr, nGuide
 
-def selectByChai2016(nGuide, fileName, parallel, nFrame, initD=None):
+def selectByChai2016New(nGuide, fileName, parallel, nFrame, initD=None):
     if parallel:
         X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, readEachFrameNoDir, nFrame) # X: len(u_s) x nHair, float64
     else:
@@ -302,6 +287,24 @@ def selectByChai2016(nGuide, fileName, parallel, nFrame, initD=None):
 
     X0 = X[:offset, :]
     X = X[offset:, :] - np.tile(X0, (nFrame-1, 1))
+
+    lambda1 = para.lambda1
+    Us = np.asfortranarray(X, 'd')
+
+    params = {'lambda1': lambda1, 'lambda2': 0, 'return_model': True, 'model': None, 'posAlpha': True}
+    D, ABi = spams.trainDL(Us, D=initD, K=nGuide, iter=100, batchsize=10, **params)  # D: len(u_s) x nGuide
+
+    norm = lambda x: np.linalg.norm(x)
+    guide, nGuide = pickGuideHair(D, X, norm, norm)
+
+    print "Got %d guide hairs" % nGuide
+    return guide, nGuide
+
+def selectByChai2016(nGuide, fileName, parallel, nFrame, initD=None):
+    if parallel:
+        X, hairHeader, Data = SCGetMatrixAndHeaderMP(fileName, readEachFrame, nFrame) # X: len(u_s) x nHair, float64
+    else:
+        X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrame, nFrame) # X: len(u_s) x nHair, float64
 
     lambda1 = para.lambda1
     Us = np.asfortranarray(X, 'd')
@@ -442,15 +445,18 @@ if __name__ == "__main__":
     nFrame = 500
     fileName = r"D:\Data\20kcurly2\total.anim2"
 
-    X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrameNoDir, 20)  # X: len(u_s) x nHair
-    #guideSelect(fileName, 200, 20, 0, selectByChai2016, False)
+    #X, hairHeader, Data = SCGetMatrixAndHeader(fileName, readEachFrameNoDir, 20)  # X: len(u_s) x nHair
+    # guideSelect(fileName, 200, 20, 0, selectByChai2016, False)
 
-    # import logging
-    # setupDefaultLogger("D:/log/log.log")
-    # opts = [100, 200, 300, 400]
-    # for o in opts:
-    #     e = guideSelect(fileName, o, nFrame, 0, selectByRandom)
-    #     logging.info("Random, %d guides: %f" % (o, e))
-    #     e = guideSelect(fileName, o, nFrame, 0, selectByChai2016)
-    #     logging.info("Chai, %d guides: %f" % (o, e))
+    import logging
+    setupDefaultLogger("D:/log/log.log")
+    opts = [100, 200, 300, 400]
+    # import ipdb; ipdb.set_trace()
+    for o in opts:
+        e = guideSelect(fileName, o, nFrame, 0, selectByChai2016New)
+        logging.info("ChaiNew, %d guides: %f" % (o, e))
+        e = guideSelect(fileName, o, nFrame, 0, selectByRandom)
+        logging.info("Random, %d guides: %f" % (o, e))
+        e = guideSelect(fileName, o, nFrame, 0, selectByChai2016)
+        logging.info("Chai, %d guides: %f" % (o, e))
     exit(0)
